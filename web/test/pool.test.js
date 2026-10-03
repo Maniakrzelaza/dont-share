@@ -3,7 +3,7 @@
 // Uruchamianie: node --test web/test/*.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, decisiveTools, hasFallout, drawRun } = require('../js/cases.js');
+const { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, decisiveTools, hasFallout, SPREAD, reachAt, harmfulReach, drawRun } = require('../js/cases.js');
 const { SCENES } = require('../js/scenes.js');
 
 test('every case is complete', () => {
@@ -74,4 +74,21 @@ test('only consequential mistakes come back in the papers', () => {
   assert.equal(hasFallout(real, 'manipulacja'), true);
   assert.equal(hasFallout(real, 'prawda'), false);
   assert.equal(hasFallout(real, null), false);
+});
+
+test('reach grows while a case sits on the desk', () => {
+  POOL.forEach((_, i) => {
+    assert.ok(reachAt(i, 0) > 0);
+    assert.ok(reachAt(i, 20) > reachAt(i, 0), 'a tool use must let it spread further');
+    assert.ok(Math.abs(reachAt(i, SPREAD.doublingMin) / reachAt(i, 0) - 2) < 0.01, 'doubles every doublingMin');
+  });
+});
+
+test('only fakes that got out count towards harmful reach', () => {
+  const fake = POOL.findIndex(c => c.truth === 'falsz');
+  const real = POOL.findIndex(c => c.truth === 'prawda');
+  assert.equal(harmfulReach({ id: fake, verdict: 'prawda', reach: 1000 }), 1000 * SPREAD.stampBoost);
+  assert.equal(harmfulReach({ id: fake, verdict: 'falsz', reach: 1000 }), 0);
+  assert.equal(harmfulReach({ id: fake, verdict: null, reach: 0 }), reachAt(fake, SPREAD.missedMin));
+  assert.equal(harmfulReach({ id: real, verdict: 'falsz', reach: 1000 }), 0);
 });

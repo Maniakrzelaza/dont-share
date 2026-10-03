@@ -10,10 +10,21 @@ const PTS_EVIDENCE = 40;
 // a „Od nowa” go nie resetuje.
 let LANG = initialLang();
 let S;
+// caseStart: minuta dnia, w której bieżące zgłoszenie trafiło na biurko — od niej liczy się zasięg.
+// tutorial: samouczek przy pierwszym zgłoszeniu, dopóki gracz raz go nie przejdzie albo nie pominie.
 const fresh = () => ({
-  screen: 'intro', run: drawRun(), day: 0, idx: 0, minutes: 0,
-  used: [], pin: null, score: 0, trust: 100, log: [], last: null
+  screen: 'intro', run: drawRun(), day: 0, idx: 0, minutes: 0, caseStart: 0,
+  used: [], pin: null, score: 0, trust: 100, log: [], last: null, tutorial: !tutorialDone()
 });
+
+function tutorialDone() {
+  try { return localStorage.getItem('ds-tutorial') === 'done'; } catch (e) { return false; }
+}
+
+function finishTutorial() {
+  S.tutorial = false;
+  try { localStorage.setItem('ds-tutorial', 'done'); } catch (e) { /* zablokowany storage */ }
+}
 
 const T = () => UI[LANG];
 const $app = document.getElementById('app');
@@ -27,6 +38,10 @@ const curCase = () => localizedCase(dayCases()[S.idx], LANG);
 const totalCases = () => S.run.flat().length;
 const toolName = k => T().tools[k].name;
 const verdictName = v => T().verdict[v];
+const fmt = n => n.toLocaleString(LANG === 'pl' ? 'pl-PL' : 'en-GB');
+const currentReach = () => reachAt(dayCases()[S.idx], S.minutes - S.caseStart);
+// Samouczek prowadzi tylko przez pierwsze zgłoszenie rozgrywki, a zegar wtedy stoi.
+const coaching = () => S.tutorial && S.day === 0 && S.idx === 0;
 
 function setLang(lang) {
   LANG = lang;
@@ -86,7 +101,8 @@ function renderIntro() {
 function falloutOf(day) {
   return S.log.filter(x => x.day === day && hasFallout(POOL[x.id], x.verdict)).map(x => ({
     c: localizedCase(x.id, LANG),
-    kind: x.verdict === null ? 'missed' : POOL[x.id].truth === 'prawda' ? 'rejected' : 'passed'
+    kind: x.verdict === null ? 'missed' : POOL[x.id].truth === 'prawda' ? 'rejected' : 'passed',
+    reach: harmfulReach(x)
   }));
 }
 
@@ -97,7 +113,7 @@ function pressHTML(items, title, date) {
         <span class="src">${t.pressOutlets[i % t.pressOutlets.length]}</span>
         <h3>${esc(f.c.fallout.headline)}</h3>
         <p>${esc(f.c.fallout.body)}</p>
-        <span class="tag">${t.pressTag[f.kind]}</span>
+        <span class="tag">${t.pressTag[f.kind]}</span>${f.reach ? ` <span class="tag reach-tag">${t.reachClip(fmt(f.reach))}</span>` : ''}
       </article>`).join('')
     : `<p class="quiet">${t.pressQuiet}</p>`;
   return `<section class="press" aria-label="${title}">
@@ -117,7 +133,7 @@ function renderDayIntro() {
     <p>${txt.memo}</p>
     ${nt}
     <button class="go" id="go">${t.dayGo}</button>`);
-  document.getElementById('go').onclick = () => { S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.used = []; S.pin = null; render(); };
+  document.getElementById('go').onclick = () => { S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.caseStart = 0; S.used = []; S.pin = null; render(); };
 }
 
 function photoHTML(p) {
@@ -162,6 +178,13 @@ function renderDesk() {
   }).join('') : `<div class="empty">${t.folderEmpty}</div>`;
   const mark = S.screen === 'feedback' && S.last ? `<div class="mark s-${S.last.verdict}">${verdictName(S.last.verdict)}</div>` : '';
   const n = S.used.length;
+  // Po pieczątce licznik zamiera na wartości z chwili decyzji.
+  const reach = S.screen === 'feedback' && S.last ? S.last.reach : currentReach();
+  const step = open && coaching() ? (n === 0 ? 'tools' : !S.pin ? 'read' : 'stamp') : null;
+  const coach = (key, at) => step === at
+    ? `<div class="coach" role="note"><b>${t.coachWho}:</b> ${t[key]}<button class="coach-skip" id="coach-skip">${t.coachSkip}</button></div>`
+    : '';
+  const target = at => step === at ? ' coach-target' : '';
 
   $app.innerHTML = `
   <header class="bar">
@@ -175,22 +198,26 @@ function renderDesk() {
   <main class="desk">
     <section>
       <p class="slot-label"><span>${t.lblCase}</span><span>${t.from(esc(c.reporter))}</span></p>
+      <div class="reach${S.screen === 'feedback' ? ' frozen' : ''}"><span>${t.reachLbl}</span><b id="reach">${t.reachPeople(fmt(reach))}</b></div>
       <article class="doc">
         <div class="ticket"><span>${t.ticketNo} ${S.day + 1}-${String(S.idx + 1).padStart(3, '0')}</span><span>${t.received(clockText(Math.max(0, S.minutes - 35)))}</span></div>
         ${docHTML(c)}
         ${mark}
       </article>
-      <div class="stamps">
+      ${coach('coachStamp', 'stamp')}
+      <div class="stamps${target('stamp')}">
         ${VERDICTS.map(v => `<button class="stamp s-${v}" data-v="${v}" ${open ? '' : 'disabled'}>${verdictName(v)}<small>${t.stampKey(t.verdictKey[v].toUpperCase())}</small></button>`).join('')}
       </div>
     </section>
     <aside>
       <p class="slot-label"><span>${t.lblTools}</span><span>${t.minutesLeft(Math.max(0, DAY_MIN - Math.floor(S.minutes)))}</span></p>
-      <div class="tools">${toolBtns}</div>
+      ${coach('coachTools', 'tools')}
+      <div class="tools${target('tools')}">${toolBtns}</div>
       <div class="folder">
         <p class="slot-label"><span>${t.lblFolder}</span><span>${t.evidenceCount(n)}</span></p>
-        ${n ? `<p class="hint">${t.pinHint(PTS_EVIDENCE)}</p>` : ''}
-        <div class="slips">${slips}</div>
+        ${coach('coachRead', 'read')}
+        ${n && step !== 'read' ? `<p class="hint">${t.pinHint(PTS_EVIDENCE)}</p>` : ''}
+        <div class="slips${target('read')}">${slips}</div>
       </div>
     </aside>
   </main>`;
@@ -198,6 +225,8 @@ function renderDesk() {
   $app.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => useTool(b.dataset.tool));
   $app.querySelectorAll('[data-v]').forEach(b => b.onclick = () => stamp(b.dataset.v));
   $app.querySelectorAll('[data-pin]').forEach(b => b.onclick = () => pin(b.dataset.pin));
+  const $skip = document.getElementById('coach-skip');
+  if ($skip) $skip.onclick = () => { finishTutorial(); render(); };
 
   // Dwa kliknięcia zamiast confirm(): przypadkowe kliknięcie nie kasuje całego dnia pracy.
   const $restart = document.getElementById('restart');
@@ -230,10 +259,12 @@ function stamp(v) {
   const pinGood = !!S.pin && decisiveTools(c).includes(S.pin);
   const pts = correct ? PTS_VERDICT + (pinGood ? PTS_EVIDENCE : 0) : 0;
   const dTrust = correct ? 5 : -20;
+  const reach = currentReach();
   S.score += pts;
   S.trust = Math.max(0, Math.min(100, S.trust + dTrust));
-  S.last = { verdict: v, correct, pin: S.pin, pinGood, pts, dTrust };
-  S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, correct, missed: false, pinGood });
+  S.last = { verdict: v, correct, pin: S.pin, pinGood, pts, dTrust, reach };
+  S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, correct, missed: false, pinGood, reach });
+  if (coaching()) finishTutorial();
   S.screen = 'feedback';
   render();
 }
@@ -243,6 +274,11 @@ function renderFeedback() {
   const head = L.correct ? (L.pinGood ? t.resGood : t.resVerdict) : t.resBad;
   const pts = L.correct ? t.ptsGood(L.pts, L.dTrust) : t.ptsBad(L.dTrust, verdictName(c.truth).toUpperCase());
   const pinLine = `<p class="pin">${L.pin ? t.pinWas(toolName(L.pin), L.pinGood) : t.pinNone(PTS_EVIDENCE)}</p>`;
+  const isTrue = c.truth === 'prawda', stampedTrue = L.verdict === 'prawda';
+  const reachText = isTrue
+    ? (stampedTrue ? t.reachTrue(fmt(L.reach)) : t.reachRejected(fmt(L.reach)))
+    : (stampedTrue ? t.reachBoosted(fmt(L.reach * SPREAD.stampBoost)) : t.reachStopped(fmt(L.reach)));
+  const reachLine = `<p class="reach-line ${!isTrue && stampedTrue ? 'bad' : ''}">${reachText}</p>`;
   const tools = DAYS[S.day].tools;
   const decisive = decisiveTools(c).map(k => `<li><b>${toolName(k)}${tools.includes(k) ? '' : t.laterTool}</b>${esc(c.ev[k][1])}</li>`).join('');
   const lastOne = S.idx + 1 >= dayCases().length;
@@ -251,6 +287,7 @@ function renderFeedback() {
     <div class="report">
       <p class="res ${L.correct ? 'good' : 'bad'}" id="rep-h">${head}</p>
       <div class="pts">${pts}</div>
+      ${reachLine}
       ${pinLine}
       <p class="lesson">${esc(c.lesson)}</p>
       <p class="key">${t.decisiveLbl}</p>
@@ -265,7 +302,7 @@ function renderFeedback() {
 
 function next() {
   if (S.trust <= 0) { S.screen = 'end'; return render(); }
-  S.idx++; S.used = []; S.pin = null; S.last = null;
+  S.idx++; S.used = []; S.pin = null; S.last = null; S.caseStart = S.minutes;
   if (S.idx >= dayCases().length) return endDay();
   S.screen = 'desk';
   render();
@@ -273,7 +310,7 @@ function next() {
 
 function endDay() {
   const missed = S.screen === 'desk' ? dayCases().slice(S.idx) : [];
-  missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, correct: false, missed: true, pinGood: false }));
+  missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, correct: false, missed: true, pinGood: false, reach: 0 }));
   S.trust = Math.max(0, S.trust - missed.length * 10);
   S.last = null;
   S.screen = S.trust <= 0 ? 'end' : 'dayEnd';
@@ -310,10 +347,43 @@ function renderDayEnd() {
   };
 }
 
+// Karta wyniku w stylu Wordle: jedna kratka na zgłoszenie, bez zdradzania treści zgłoszeń.
+const SQUARE = x => x.missed ? '⬜' : !x.correct ? '🟥' : x.pinGood ? '🟩' : '🟨';
+
+function shareText(st, spread) {
+  const t = T();
+  const days = DAYS.map((_, d) => S.log.filter(x => x.day === d)).filter(l => l.length)
+    .map((l, d) => `${t.shareDay(d + 1)} ${l.map(SQUARE).join('')}`);
+  const origin = /^https?:/.test(location.protocol) ? location.origin : 'https://vitrino.pl';
+  return [t.shareHead(st.ok, totalCases(), S.score), ...days, t.shareSpread(spread ? fmt(spread) : 0),
+    `${origin}/${LANG === 'en' ? '?lang=en' : ''}`].join('\n');
+}
+
+function bindShare(text) {
+  const t = T(), $copy = document.getElementById('share-copy'), $card = document.getElementById('share-card');
+  $copy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      $copy.textContent = t.shareCopied;
+      setTimeout(() => { $copy.textContent = T().shareCopy; }, 2000);
+    } catch (e) {
+      // Bez dostępu do schowka zaznaczamy kartę, żeby gracz skopiował ją sam.
+      const range = document.createRange();
+      range.selectNodeContents($card);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      document.getElementById('share-note').textContent = t.shareCopyFail;
+    }
+  };
+  const $native = document.getElementById('share-native');
+  if ($native) $native.onclick = () => navigator.share({ text }).catch(() => { /* gracz zamknął okno */ });
+}
+
 function renderEnd() {
   const t = T(), st = stats();
   const fired = S.trust <= 0;
   const rank = t.rank[fired ? 'fired' : st.ok >= 13 ? 'senior' : st.ok >= 9 ? 'staff' : st.ok >= 5 ? 'extended' : 'retrain'];
+  const spread = S.log.reduce((sum, x) => sum + harmfulReach(x), 0);
+  const card = shareText(st, spread);
   $app.innerHTML = memo(`
     <div class="hdr">${t.endHdr}</div>
     <h1>${rank}</h1>
@@ -324,24 +394,37 @@ function renderEnd() {
       <div><div class="n">${st.bad}</div><div class="l">${t.eWrong}</div></div>
       <div><div class="n">${st.missed}</div><div class="l">${t.eMissed}</div></div>
       <div><div class="n">${S.score}</div><div class="l">${t.eScore}</div></div>
+      <div><div class="n">${fmt(spread)}</div><div class="l">${t.tSpread}</div></div>
     </div>
+    <section class="share">
+      <div class="share-head"><b>${t.shareTitle}</b><span>${t.shareIrony}</span></div>
+      <pre id="share-card">${esc(card)}</pre>
+      <div class="share-actions">
+        <button class="go" id="share-copy">${t.shareCopy}</button>
+        ${navigator.share ? `<button class="go ghost" id="share-native">${t.shareNative}</button>` : ''}
+      </div>
+      <p class="again-hint" id="share-note" aria-live="polite"></p>
+    </section>
     ${pressHTML(falloutOf(S.day), t.finalPressTitle, S.day + 1 < DAYS.length ? t.days[S.day + 1].date : t.pressFinalDate)}
     <h2>${t.cheatTitle}</h2>
     <ol class="cheat">${t.cheat.map(x => `<li>${x}</li>`).join('')}</ol>
     <button class="go" id="go">${t.btnAgain}</button>
     <p class="again-hint">${t.againHint}</p>`);
   document.getElementById('go').onclick = () => { S = fresh(); render(); };
+  bindShare(card);
 }
 
 // zegar
 let lastTick = performance.now();
 setInterval(() => {
   const now = performance.now(), dt = (now - lastTick) / 1000; lastTick = now;
-  if (S.screen !== 'desk') return;
+  if (S.screen !== 'desk' || coaching()) return;
   S.minutes += dt * DAYS[S.day].speed;
   if (S.minutes >= DAY_MIN) return endDay();
   const el = document.getElementById('clock');
   if (el) { el.textContent = clockText(S.minutes); el.classList.toggle('late', S.minutes > DAY_MIN - 60); }
+  const $reach = document.getElementById('reach');
+  if ($reach) $reach.textContent = T().reachPeople(fmt(currentReach()));
 }, 250);
 
 document.addEventListener('keydown', e => {

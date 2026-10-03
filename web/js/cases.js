@@ -424,6 +424,29 @@ function evidenceOf(c, tool, lang = 'pl') {
   return ['info', f.nothing];
 }
 
+// Zasięg: ile osób widziało zgłoszenie. Rośnie, dopóki leży na biurku — podwaja się co
+// doublingMin minut czasu gry — więc każde narzędzie kosztuje nie tylko czas, ale i ludzi, do
+// których zdąży dotrzeć. Tempo jest jednakowe dla prawdy i fałszu, żeby licznik nie zdradzał
+// odpowiedzi. Pieczątka „prawda” na fałszywce mnoży zasięg (stampBoost), a niesprawdzona fałszywka
+// rozchodzi się tak, jakby leżała missedMin minut.
+const SPREAD = { doublingMin: 45, stampBoost: 4, missedMin: 240 };
+
+function initialReach(i) {
+  return 600 + ((i + 1) * 7919) % 5400;
+}
+
+function reachAt(i, minutesOpen) {
+  return Math.round(initialReach(i) * Math.pow(2, Math.max(0, minutesOpen) / SPREAD.doublingMin));
+}
+
+// Ostateczny zasięg fałszywki, która przeszła albo nie została sprawdzona; 0, gdy nikomu nie
+// zaszkodziła.
+function harmfulReach(entry) {
+  if (POOL[entry.id].truth === 'prawda') return 0;
+  if (entry.verdict === null) return reachAt(entry.id, SPREAD.missedMin);
+  return entry.verdict === 'prawda' ? entry.reach * SPREAD.stampBoost : 0;
+}
+
 // Czy decyzja gracza wraca następnego dnia w prasie (fallout zgłoszenia). verdict === null znaczy,
 // że zgłoszenie zostało niesprawdzone. Fałszywka lub manipulacja wraca, gdy przeszła jako prawda
 // albo nikt jej nie zatrzymał; prawda — gdy została odrzucona. Pomylenie fałszu z manipulacją nie
@@ -471,5 +494,5 @@ function drawRun(rand = Math.random) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, localizedCase, evidenceOf, decisiveTools, hasFallout, drawRun };
+  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, SPREAD, localizedCase, evidenceOf, decisiveTools, hasFallout, reachAt, harmfulReach, drawRun };
 }

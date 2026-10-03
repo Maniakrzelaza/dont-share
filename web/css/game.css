@@ -296,3 +296,42 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outlin
 .clip.passed .tag, .clip.missed .tag { color: var(--false); }
 .clip.rejected .tag { color: var(--true); }
 .quiet { font-style: italic; color: var(--ink-muted); margin: 0; }
+
+/* licznik zasięgu: rośnie, dopóki zgłoszenie leży na biurku */
+.reach {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  background: var(--led); border-radius: 4px; padding: 6px 12px; margin-bottom: 10px;
+  font: 500 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--desk-muted);
+}
+.reach b { font: 600 17px var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; color: #ff8a70; }
+.reach b::before { content: "↗ "; }
+.reach.frozen b { color: var(--desk-fg); }
+.reach.frozen b::before { content: "■ "; }
+.reach-line { font: 600 13.5px var(--font-mono); margin: 0 0 12px; color: var(--ink-muted); }
+.reach-line.bad { color: var(--false); }
+.clip .reach-tag { color: var(--ink); border-color: var(--ink-muted); }
+
+/* samouczek: naczelna podpowiada przy pierwszym zgłoszeniu */
+.coach {
+  background: var(--signal); color: #1b1608; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;
+  font-size: 14px; line-height: 1.45; box-shadow: 0 6px 16px rgba(0,0,0,.3); animation: slide .25s ease-out;
+}
+.coach-skip {
+  display: block; margin-top: 6px; background: none; border: 0; padding: 0; color: #1b1608;
+  font: 600 12px var(--font-mono); text-decoration: underline; text-underline-offset: 2px;
+}
+.coach-target { outline: 3px solid var(--signal); outline-offset: 6px; border-radius: 6px; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { outline-color: rgba(242,180,58,.35); } }
+
+/* karta wyniku do udostępnienia */
+.share { border: 2px solid var(--ink); border-radius: 6px; padding: 14px 16px; margin: 6px 0 22px; }
+.share-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.share-head b { font-family: var(--font-display); font-stretch: 80%; font-weight: 800; font-size: 20px; }
+.share-head span { font-size: 13px; color: var(--ink-muted); }
+.share pre {
+  margin: 0 0 12px; padding: 12px; background: var(--paper-2); border-radius: 4px; overflow-x: auto;
+  font: 14px/1.6 var(--font-mono); white-space: pre;
+}
+.share-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.go.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.share .again-hint:empty { display: none; }
