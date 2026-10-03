@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The whole game is one inline script; a syntax error there is a blank desk for every player.
-      - name: Syntax-check the game script
-        run: |
-          sed -n '/^<script>$/,/^<\/script>$/p' web/index.html | sed '1d;$d' > /tmp/game.js
-          test -s /tmp/game.js
-          node --check /tmp/game.js
+      # A syntax error in any script is a blank desk for every player.
+      - name: Syntax-check the game scripts
+        run: for f in web/js/*.js; do node --check "$f"; done
+      # Every drawn run must be playable: complete cases, decidable with that day's tools.
+      - name: Test the case pool and drawing rules
+        run: node --test web/test/*.test.js
 
   image:
     needs: check
