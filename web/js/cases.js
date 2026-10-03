@@ -5,25 +5,18 @@
 // 3 — dokument źródłowy. Dowody (ev) mają flagę: 'ok' potwierdza prawdę, 'red' zdradza fałszywkę
 // lub manipulację, 'info' to tło bez rozstrzygnięcia. Flagi nie są pokazywane graczowi — służą do
 // oceny, czy wskazany przez niego kluczowy dowód rzeczywiście przesądzał.
+//
+// Treść zgłoszeń jest tu po polsku; angielska wersja tekstów jest w cases.en.js, a nazwy narzędzi,
+// werdyktów i dni — w i18n.js. Klucze (zrodlo, prawda…) są wspólne dla obu języków.
 
-const TOOLS = {
-  zrodlo:   { name: 'Rejestr źródeł',       desc: 'Kto to opublikował i od kiedy działa' },
-  data:     { name: 'Archiwum dat',         desc: 'Kiedy treść pojawiła się po raz pierwszy' },
-  obraz:    { name: 'Wyszukiwanie obrazem', desc: 'Skąd naprawdę pochodzi zdjęcie' },
-  dokument: { name: 'Dokument źródłowy',    desc: 'Pełny cytat, badanie albo raport' }
-};
 const TOOL_ORDER = ['zrodlo', 'data', 'obraz', 'dokument'];
 const VERDICTS = ['prawda', 'falsz', 'manipulacja'];
-const VERDICT = { prawda: 'Prawda', falsz: 'Fałsz', manipulacja: 'Manipulacja' };
 const CASES_PER_DAY = 5;
 
 const DAYS = [
-  { date: 'Poniedziałek, 5 października 2026', tools: ['zrodlo', 'data'], speed: 3,
-    memo: 'Pierwszy dzień. Masz dwa narzędzia: rejestr źródeł i archiwum dat. Pięć zgłoszeń od czytelników czeka w kolejce.' },
-  { date: 'Wtorek, 6 października 2026', tools: ['zrodlo', 'data', 'obraz'], speed: 4, newTool: 'obraz',
-    memo: 'Dział IT podłączył wyszukiwarkę obrazów. Dziś dużo zgłoszeń ze zdjęciami. Zegar biegnie szybciej, bo dzień jest gorący.' },
-  { date: 'Środa, 7 października 2026', tools: ['zrodlo', 'data', 'obraz', 'dokument'], speed: 5, newTool: 'dokument',
-    memo: 'Dostajesz dostęp do bazy dokumentów: zapisów wywiadów, badań i raportów. Ostatni dzień okresu próbnego. Pokaż, co umiesz.' }
+  { tools: ['zrodlo', 'data'], speed: 3 },
+  { tools: ['zrodlo', 'data', 'obraz'], speed: 4, newTool: 'obraz' },
+  { tools: ['zrodlo', 'data', 'obraz', 'dokument'], speed: 5, newTool: 'dokument' }
 ];
 
 const POOL = [
@@ -333,24 +326,41 @@ const POOL = [
     lesson: 'Sprostowanie to znak rzetelności, nie słabości. Źródło przyznało się do błędu i pokazało, jak go poprawia.' }
 ];
 
-const CHEAT = [
-  'Czytaj adres strony litera po literze. Podróbki różnią się końcówką albo myślnikiem.',
-  'Sprawdzaj, kto stoi za kontem lub stroną i od kiedy działa.',
-  'Patrz na datę publikacji, nie na datę udostępnienia.',
-  'Wyszukaj zdjęcie obrazem. Stare fotografie często wracają w nowym kontekście.',
-  'Szukaj błędów AI i fotomontażu w szczegółach: dłonie, odbicia, cienie.',
-  'Czytaj pełny cytat i pracę źródłową, a nie tylko nagłówek. Pytaj: ile osób, z ilu, kto?',
-  'Silne emocje, pośpiech i „udostępnij, zanim usuną” to sygnały ostrzegawcze.',
-  'Dobra, nudna albo nietypowa wiadomość też może być prawdziwa. Weryfikuj, zanim odrzucisz.'
-];
+const FALLBACK_EVIDENCE = {
+  pl: { noPhoto: 'W zgłoszeniu nie ma zdjęcia.', noDocument: 'Zgłoszenie nie powołuje się na żaden cytat, badanie ani raport.', nothing: 'Brak dodatkowych informacji.' },
+  en: { noPhoto: 'The report contains no photo.', noDocument: 'The report cites no quote, study or report.', nothing: 'No further information.' }
+};
+
+// Zgłoszenie w wybranym języku: polska baza z nałożonymi tekstami z POOL_EN. Flagi dowodów
+// zostają z bazy, podmieniany jest tylko tekst.
+function overlay(base, text) {
+  if (!text) return base;
+  const out = { ...base };
+  Object.keys(text).forEach(k => {
+    out[k] = typeof text[k] === 'object' && base[k] && typeof base[k] === 'object' ? overlay(base[k], text[k]) : text[k];
+  });
+  return out;
+}
+
+function localizedCase(i, lang) {
+  const c = POOL[i];
+  if (lang === 'pl' || typeof POOL_EN === 'undefined') return c;
+  const t = POOL_EN[i];
+  const { ev, ...rest } = t;
+  const out = overlay(c, rest);
+  out.ev = {};
+  Object.keys(c.ev).forEach(k => { out.ev[k] = [c.ev[k][0], (ev && ev[k]) || c.ev[k][1]]; });
+  return out;
+}
 
 // Dowód, który pokazuje narzędzie. Zgłoszenie z niższego poziomu nie ma wpisów dla narzędzi z
 // wyższych dni, więc trafia tu neutralna odpowiedź zamiast pustej kartki.
-function evidenceOf(c, tool) {
+function evidenceOf(c, tool, lang = 'pl') {
+  const f = FALLBACK_EVIDENCE[lang];
   if (c.ev[tool]) return c.ev[tool];
-  if (tool === 'obraz' && !c.photo) return ['info', 'W zgłoszeniu nie ma zdjęcia.'];
-  if (tool === 'dokument') return ['info', 'Zgłoszenie nie powołuje się na żaden cytat, badanie ani raport.'];
-  return ['info', 'Brak dodatkowych informacji.'];
+  if (tool === 'obraz' && !c.photo) return ['info', f.noPhoto];
+  if (tool === 'dokument') return ['info', f.noDocument];
+  return ['info', f.nothing];
 }
 
 // Narzędzia, których wynik przesądza o werdykcie: potwierdzenie przy prawdzie, sygnał
@@ -391,5 +401,5 @@ function drawRun(rand = Math.random) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { TOOLS, TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, evidenceOf, decisiveTools, drawRun };
+  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, localizedCase, evidenceOf, decisiveTools, drawRun };
 }

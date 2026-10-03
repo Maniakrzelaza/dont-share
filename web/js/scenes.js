@@ -1,4 +1,4 @@
-// Ilustracje zgłoszeń jako sceny SVG. Każda scena to funkcja zwracająca kod SVG 320×180.
+// Ilustracje zgłoszeń jako sceny SVG. Każda scena to funkcja (lang) zwracająca kod SVG 320×180.
 //
 // Niektóre sceny zawierają ślady, które opisuje wyszukiwanie obrazem — uważny gracz może je
 // wypatrzyć sam, zanim użyje narzędzia:
@@ -7,6 +7,12 @@
 //   fuel  — ceny na pylonie są w euro (zdjęcie z innego kraju).
 
 const SCENE_FONT = 'font-family="Archivo, Arial Narrow, Arial, sans-serif"';
+
+// Napisy, które pojawiają się w samych scenach.
+const SCENE_TEXT = {
+  pl: { tv: { label: 'PILNE', labelSize: 12, headline: 'GODZINA POLICYJNA OD SOBOTY', ticker: 'CAŁY KRAJ • OD 20:00 DO 6:00 • SZCZEGÓŁY WKRÓTCE' } },
+  en: { tv: { label: 'BREAKING', labelSize: 9.5, headline: 'NATIONWIDE CURFEW FROM SATURDAY', ticker: 'WHOLE COUNTRY • 20:00 TO 6:00 • DETAILS TO FOLLOW' } }
+};
 
 function svgScene(defs, body) {
   return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>${defs}</defs>${body}</svg>`;
@@ -182,7 +188,7 @@ const SCENES = {
       </g>`);
   },
 
-  chart() {
+  chart(lang) {
     let bars = '';
     const n = 38;
     for (let i = 0; i < n; i++) {
@@ -199,7 +205,7 @@ const SCENES = {
       <g ${SCENE_FONT} font-size="8" fill="#3b4248">
         <text x="30" y="162">1951</text><text x="284" y="162">2026</text>
         <text x="6" y="64">18°</text><text x="6" y="124">14°</text>
-        <text x="272" y="38" font-weight="700" fill="#c22f2a">17,9°C</text>
+        <text x="272" y="38" font-weight="700" fill="#c22f2a">${lang === 'en' ? '17.9°C' : '17,9°C'}</text>
       </g>`);
   },
 
@@ -303,7 +309,8 @@ const SCENES = {
       ${junk}`);
   },
 
-  tvbar() {
+  tvbar(lang) {
+    const tx = SCENE_TEXT[lang === 'en' ? 'en' : 'pl'].tv;
     return svgScene(grad('tvBg', [[0, '#21405e'], [1, '#0f1b2b']]) +
       `<radialGradient id="tvBokeh"><stop offset="0" stop-color="#8fb3d9" stop-opacity=".55"/><stop offset="1" stop-color="#8fb3d9" stop-opacity="0"/></radialGradient>`,
       `<rect width="320" height="180" fill="url(#tvBg)"/>
@@ -317,10 +324,10 @@ const SCENES = {
       <text x="19" y="24" ${SCENE_FONT} font-size="10" font-weight="900" fill="#0f1b2b">INFO 24</text>
       <rect y="132" width="320" height="24" fill="#c22f2a"/>
       <rect y="132" width="56" height="24" fill="#f2b43a"/>
-      <text x="8" y="149" ${SCENE_FONT} font-size="12" font-weight="900" fill="#111">PILNE</text>
-      <text x="62" y="148.5" ${SCENE_FONT} font-size="10.5" font-weight="800" fill="#ffffff">GODZINA POLICYJNA OD SOBOTY</text>
+      <text x="8" y="149" ${SCENE_FONT} font-size="${tx.labelSize}" font-weight="900" fill="#111">${tx.label}</text>
+      <text x="62" y="148.5" ${SCENE_FONT} font-size="10.5" font-weight="800" fill="#ffffff">${tx.headline}</text>
       <rect y="156" width="320" height="14" fill="#0b1320"/>
-      <text x="8" y="166" ${SCENE_FONT} font-size="7.5" fill="#9fb0c2">CAŁY KRAJ • OD 20:00 DO 6:00 • SZCZEGÓŁY WKRÓTCE</text>
+      <text x="8" y="166" ${SCENE_FONT} font-size="7.5" fill="#9fb0c2">${tx.ticker}</text>
       <rect x="276" y="156" width="44" height="14" fill="#c22f2a"/>
       <text x="284" y="166" ${SCENE_FONT} font-size="8" font-weight="700" fill="#ffffff">12:41</text>`);
   },

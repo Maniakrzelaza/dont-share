@@ -1,16 +1,21 @@
-// Logika gry: stan, ekrany i zegar. Treść jest w cases.js, ilustracje w scenes.js.
+// Logika gry: stan, ekrany i zegar. Treść jest w cases.js / cases.en.js, teksty interfejsu
+// w i18n.js, ilustracje w scenes.js.
 
 const TOOL_COST = 20;
 const DAY_MIN = 480; // 8:00 – 16:00
 const PTS_VERDICT = 60;
 const PTS_EVIDENCE = 40;
 
+// Język nie należy do stanu rozgrywki: przełączenie go w połowie dnia tylko przerysowuje ekran,
+// a „Od nowa” go nie resetuje.
+let LANG = initialLang();
 let S;
 const fresh = () => ({
   screen: 'intro', run: drawRun(), day: 0, idx: 0, minutes: 0,
   used: [], pin: null, score: 0, trust: 100, log: [], last: null
 });
 
+const T = () => UI[LANG];
 const $app = document.getElementById('app');
 const $layer = document.getElementById('layer');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -18,60 +23,80 @@ const clockText = m => { const t = 480 + Math.min(DAY_MIN, Math.floor(m)); retur
 const hueOf = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7);
 const initials = n => n.split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
 const dayCases = () => S.run[S.day];
-const curCase = () => POOL[dayCases()[S.idx]];
+const curCase = () => localizedCase(dayCases()[S.idx], LANG);
 const totalCases = () => S.run.flat().length;
-const plural = (n, one, few, many) => n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many;
+const toolName = k => T().tools[k].name;
+const verdictName = v => T().verdict[v];
+
+function setLang(lang) {
+  LANG = lang;
+  try { localStorage.setItem('ds-lang', lang); } catch (e) { /* zablokowany storage */ }
+  applyLang();
+  render();
+}
+
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = T().htmlTitle;
+}
+
+function langButton() {
+  return `<button class="lang" id="lang" aria-label="${T().langSwitchLabel}" lang="${LANG === 'pl' ? 'en' : 'pl'}">${T().langSwitch}</button>`;
+}
+
+function bindLang() {
+  const b = document.getElementById('lang');
+  if (b) b.onclick = () => setLang(LANG === 'pl' ? 'en' : 'pl');
+}
 
 function render() {
   $layer.innerHTML = '';
-  if (S.screen === 'intro') return renderIntro();
-  if (S.screen === 'dayIntro') return renderDayIntro();
-  if (S.screen === 'dayEnd') return renderDayEnd();
-  if (S.screen === 'end') return renderEnd();
-  renderDesk();
-  if (S.screen === 'feedback') renderFeedback();
+  if (S.screen === 'intro') renderIntro();
+  else if (S.screen === 'dayIntro') renderDayIntro();
+  else if (S.screen === 'dayEnd') renderDayEnd();
+  else if (S.screen === 'end') renderEnd();
+  else {
+    renderDesk();
+    if (S.screen === 'feedback') renderFeedback();
+  }
+  bindLang();
 }
 
+const memo = inner => `<div class="langbar">${langButton()}</div><div class="memo">${inner}</div>`;
+
 function renderIntro() {
-  $app.innerHTML = `
-  <div class="memo">
-    <div class="hdr">OD: Redaktor naczelna<br>DO: Nowa osoba w dziale weryfikacji<br>TEMAT: Twój okres próbny, 3 dni</div>
+  const t = T();
+  const keys = VERDICTS.map(v => `<span class="kbd">${t.verdictKey[v].toUpperCase()}</span> ${t.verdict[v].toLowerCase()},`).join(' ');
+  $app.innerHTML = memo(`
+    <div class="hdr">${t.introHdr}</div>
     <h1>Don’t Share</h1>
-    <p>Czytelnicy przysyłają nam podejrzane wiadomości. Twoja praca: sprawdzić każdą i przybić jedną z trzech pieczątek, zanim fałszywka obiegnie kraj.</p>
+    <p>${t.introLead}</p>
     <ul class="verdicts">
-      <li><b class="s-prawda">Prawda</b><span>Informacja zgadza się z faktami i ma wiarygodne źródło.</span></li>
-      <li><b class="s-falsz">Fałsz</b><span>Informacja zmyślona, satyra wzięta na serio albo oszustwo.</span></li>
-      <li><b class="s-manipulacja">Manipulacja</b><span>Prawdziwy materiał w fałszywym kontekście: stare zdjęcie, ucięty cytat, przekręcone badanie.</span></li>
+      ${VERDICTS.map(v => `<li><b class="s-${v}">${t.verdict[v]}</b><span>${t.verdictDef[v]}</span></li>`).join('')}
     </ul>
     <ul class="rules">
-      <li>Pracujesz od 8:00 do 16:00. Każde użycie narzędzia zajmuje ${TOOL_COST} minut.</li>
-      <li>Wyniki narzędzi trafiają do teczki. Sam oceniasz, co znaczą, i wskazujesz kartkę, która przesądza sprawę.</li>
-      <li>Trafny werdykt: +${PTS_VERDICT} pkt. Trafnie wskazany kluczowy dowód: dodatkowe +${PTS_EVIDENCE} pkt.</li>
-      <li>Błędny werdykt obniża zaufanie czytelników o 20, niesprawdzone zgłoszenie o 10. Przy zerze tracisz pracę.</li>
-      <li>Skróty: <span class="kbd">P</span> prawda, <span class="kbd">F</span> fałsz, <span class="kbd">M</span> manipulacja, <span class="kbd">1</span>–<span class="kbd">4</span> wskazanie kartki.</li>
+      ${t.rules(TOOL_COST, PTS_VERDICT, PTS_EVIDENCE).map(r => `<li>${r}</li>`).join('')}
+      <li>${t.shortcuts(`${keys} <span class="kbd">1</span>–<span class="kbd">4</span>`)}</li>
     </ul>
-    <button class="go" id="go">Zaczynam pierwszy dzień</button>
-  </div>`;
+    <button class="go" id="go">${t.introGo}</button>`);
   document.getElementById('go').onclick = () => { S.screen = 'dayIntro'; render(); };
 }
 
 function renderDayIntro() {
-  const d = DAYS[S.day];
-  const nt = d.newTool ? `<div class="newtool"><span class="t">Nowe narzędzie</span><b>${TOOLS[d.newTool].name}</b>${TOOLS[d.newTool].desc}.</div>` : '';
-  $app.innerHTML = `
-  <div class="memo">
-    <div class="hdr">DZIEŃ ${S.day + 1} Z ${DAYS.length} · ${d.date}<br>Zgłoszeń w kolejce: ${dayCases().length} · Zaufanie czytelników: ${S.trust}%</div>
-    <h2>${S.day === 0 ? 'Witaj w redakcji.' : 'Dzień dobry. Kawa stoi na biurku.'}</h2>
-    <p>${d.memo}</p>
+  const t = T(), d = DAYS[S.day], txt = t.days[S.day];
+  const nt = d.newTool ? `<div class="newtool"><span class="t">${t.newTool}</span><b>${toolName(d.newTool)}</b>${t.tools[d.newTool].desc}.</div>` : '';
+  $app.innerHTML = memo(`
+    <div class="hdr">${t.dayHdr(S.day + 1, DAYS.length, txt.date, dayCases().length, S.trust)}</div>
+    <h2>${S.day === 0 ? t.dayGreetFirst : t.dayGreet}</h2>
+    <p>${txt.memo}</p>
     ${nt}
-    <button class="go" id="go">Otwórz kolejkę</button>
-  </div>`;
+    <button class="go" id="go">${t.dayGo}</button>`);
   document.getElementById('go').onclick = () => { S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.used = []; S.pin = null; render(); };
 }
 
 function photoHTML(p) {
   if (!p) return '';
-  return `<div class="photo">${SCENES[p.scene]()}<span>FOT.: ${esc(p.caption)}</span></div>`;
+  return `<div class="photo">${SCENES[p.scene](LANG)}<span>${T().photoCredit} ${esc(p.caption)}</span></div>`;
 }
 
 function docHTML(c) {
@@ -91,54 +116,54 @@ function docHTML(c) {
       <div><div class="post-name">${esc(p.name)}</div><div class="post-meta">${esc(p.handle)} · ${esc(p.time)}</div></div></div>
     <p class="post-text">${esc(p.text)}</p>
     ${link}${photo}
-    <div class="post-foot"><span>↻ ${esc(p.shares)} udostępnień</span><span>Zgłoszono jako podejrzane</span></div>`;
+    <div class="post-foot"><span>${T().shares(esc(p.shares))}</span><span>${T().reported}</span></div>`;
 }
 
 function renderDesk() {
-  const d = DAYS[S.day], c = curCase();
+  const t = T(), d = DAYS[S.day], c = curCase();
   const late = S.minutes > DAY_MIN - 60;
   const open = S.screen === 'desk';
   const toolBtns = TOOL_ORDER.map(k => {
     const avail = d.tools.includes(k), done = S.used.includes(k);
-    const tag = !avail ? `od dnia ${DAYS.findIndex(x => x.tools.includes(k)) + 1}` : done ? 'sprawdzone' : `−${TOOL_COST} min`;
+    const tag = !avail ? t.toolLocked(DAYS.findIndex(x => x.tools.includes(k)) + 1) : done ? t.toolDone : t.toolCost(TOOL_COST);
     return `<button class="tool${done ? ' done' : ''}" data-tool="${k}" ${!avail || done || !open ? 'disabled' : ''}>
-      <b>${TOOLS[k].name}</b><span>${TOOLS[k].desc}</span><em>${tag}</em></button>`;
+      <b>${toolName(k)}</b><span>${t.tools[k].desc}</span><em>${tag}</em></button>`;
   }).join('');
   const slips = S.used.length ? S.used.map((k, i) => {
     const pinned = S.pin === k;
     return `<button class="slip${pinned ? ' pinned' : ''}" data-pin="${k}" ${open ? '' : 'disabled'} aria-pressed="${pinned}">
-      <span class="h"><span>${i + 1}. ${TOOLS[k].name}</span><i>${pinned ? '★ kluczowy dowód' : 'wskaż jako kluczowy'}</i></span>${esc(evidenceOf(c, k)[1])}</button>`;
-  }).join('') : `<div class="empty">Teczka jest pusta. Użyj narzędzi, żeby zebrać dowody, zanim przybijesz pieczątkę.</div>`;
-  const mark = S.screen === 'feedback' && S.last ? `<div class="mark s-${S.last.verdict}">${VERDICT[S.last.verdict]}</div>` : '';
+      <span class="h"><span>${i + 1}. ${toolName(k)}</span><i>${pinned ? t.pinned : t.pinMe}</i></span>${esc(evidenceOf(c, k, LANG)[1])}</button>`;
+  }).join('') : `<div class="empty">${t.folderEmpty}</div>`;
+  const mark = S.screen === 'feedback' && S.last ? `<div class="mark s-${S.last.verdict}">${verdictName(S.last.verdict)}</div>` : '';
   const n = S.used.length;
 
   $app.innerHTML = `
   <header class="bar">
-    <div class="brand">Don’t Share<small>Dzień ${S.day + 1} · ${d.date}</small></div>
-    <div class="stat"><span class="lbl">Godzina</span><span class="clock${late ? ' late' : ''}" id="clock">${clockText(S.minutes)}</span></div>
-    <div class="stat"><span class="lbl">Kolejka</span><span class="val">${S.idx + 1} / ${dayCases().length}</span></div>
-    <div class="stat"><span class="lbl">Punkty</span><span class="val">${S.score}</span></div>
-    <div class="stat"><span class="lbl">Zaufanie ${S.trust}%</span><div class="meter${S.trust <= 40 ? ' low' : ''}"><i style="width:${S.trust}%"></i></div></div>
-    <button class="restart" id="restart">Od nowa</button>
+    <div class="brand">Don’t Share<small>${t.brandDay(S.day + 1, t.days[S.day].date)}</small></div>
+    <div class="stat"><span class="lbl">${t.lblClock}</span><span class="clock${late ? ' late' : ''}" id="clock">${clockText(S.minutes)}</span></div>
+    <div class="stat"><span class="lbl">${t.lblQueue}</span><span class="val">${S.idx + 1} / ${dayCases().length}</span></div>
+    <div class="stat"><span class="lbl">${t.lblScore}</span><span class="val">${S.score}</span></div>
+    <div class="stat"><span class="lbl">${t.lblTrust(S.trust)}</span><div class="meter${S.trust <= 40 ? ' low' : ''}"><i style="width:${S.trust}%"></i></div></div>
+    <div class="bar-actions">${langButton()}<button class="restart" id="restart">${t.restart}</button></div>
   </header>
   <main class="desk">
     <section>
-      <p class="slot-label"><span>Zgłoszenie</span><span>od: ${esc(c.reporter)}</span></p>
+      <p class="slot-label"><span>${t.lblCase}</span><span>${t.from(esc(c.reporter))}</span></p>
       <article class="doc">
-        <div class="ticket"><span>NR ${S.day + 1}-${String(S.idx + 1).padStart(3, '0')}</span><span>wpłynęło ${clockText(Math.max(0, S.minutes - 35))}</span></div>
+        <div class="ticket"><span>${t.ticketNo} ${S.day + 1}-${String(S.idx + 1).padStart(3, '0')}</span><span>${t.received(clockText(Math.max(0, S.minutes - 35)))}</span></div>
         ${docHTML(c)}
         ${mark}
       </article>
       <div class="stamps">
-        ${VERDICTS.map(v => `<button class="stamp s-${v}" data-v="${v}" ${open ? '' : 'disabled'}>${VERDICT[v]}<small>klawisz ${v[0].toUpperCase()}</small></button>`).join('')}
+        ${VERDICTS.map(v => `<button class="stamp s-${v}" data-v="${v}" ${open ? '' : 'disabled'}>${verdictName(v)}<small>${t.stampKey(t.verdictKey[v].toUpperCase())}</small></button>`).join('')}
       </div>
     </section>
     <aside>
-      <p class="slot-label"><span>Narzędzia</span><span>zostało ${Math.max(0, DAY_MIN - Math.floor(S.minutes))} min</span></p>
+      <p class="slot-label"><span>${t.lblTools}</span><span>${t.minutesLeft(Math.max(0, DAY_MIN - Math.floor(S.minutes)))}</span></p>
       <div class="tools">${toolBtns}</div>
       <div class="folder">
-        <p class="slot-label"><span>Teczka dowodów</span><span>${n} ${plural(n, 'dowód', 'dowody', 'dowodów')}</span></p>
-        ${n ? `<p class="hint">Kliknij kartkę, która przesądza o werdykcie. Trafny wybór: +${PTS_EVIDENCE} pkt.</p>` : ''}
+        <p class="slot-label"><span>${t.lblFolder}</span><span>${t.evidenceCount(n)}</span></p>
+        ${n ? `<p class="hint">${t.pinHint(PTS_EVIDENCE)}</p>` : ''}
         <div class="slips">${slips}</div>
       </div>
     </aside>
@@ -153,8 +178,8 @@ function renderDesk() {
   $restart.onclick = () => {
     if ($restart.classList.contains('armed')) { S = fresh(); return render(); }
     $restart.classList.add('armed');
-    $restart.textContent = 'Na pewno?';
-    setTimeout(() => { $restart.classList.remove('armed'); $restart.textContent = 'Od nowa'; }, 3000);
+    $restart.textContent = t.restartConfirm;
+    setTimeout(() => { $restart.classList.remove('armed'); $restart.textContent = T().restart; }, 3000);
   };
 }
 
@@ -188,16 +213,12 @@ function stamp(v) {
 }
 
 function renderFeedback() {
-  const c = curCase(), L = S.last;
-  const head = L.correct ? (L.pinGood ? 'Trafnie i z dowodem.' : 'Trafny werdykt.') : 'Błędny werdykt.';
-  const pts = L.correct
-    ? `+${L.pts} pkt · zaufanie +${L.dTrust}`
-    : `0 pkt · zaufanie ${L.dTrust} · poprawnie: ${VERDICT[c.truth].toUpperCase()}`;
-  const pinLine = L.pin
-    ? `<p class="pin">Twój kluczowy dowód: ${TOOLS[L.pin].name} — ${L.pinGood ? '<b class="good">przesądzał</b>' : '<b class="bad">nie przesądzał</b>'}.</p>`
-    : `<p class="pin">Nie wskazano kluczowego dowodu. Do wzięcia było +${PTS_EVIDENCE} pkt.</p>`;
+  const t = T(), c = curCase(), L = S.last;
+  const head = L.correct ? (L.pinGood ? t.resGood : t.resVerdict) : t.resBad;
+  const pts = L.correct ? t.ptsGood(L.pts, L.dTrust) : t.ptsBad(L.dTrust, verdictName(c.truth).toUpperCase());
+  const pinLine = `<p class="pin">${L.pin ? t.pinWas(toolName(L.pin), L.pinGood) : t.pinNone(PTS_EVIDENCE)}</p>`;
   const tools = DAYS[S.day].tools;
-  const decisive = decisiveTools(c).map(k => `<li><b>${TOOLS[k].name}${tools.includes(k) ? '' : ' (dostępny później)'}</b>${esc(c.ev[k][1])}</li>`).join('');
+  const decisive = decisiveTools(c).map(k => `<li><b>${toolName(k)}${tools.includes(k) ? '' : t.laterTool}</b>${esc(c.ev[k][1])}</li>`).join('');
   const lastOne = S.idx + 1 >= dayCases().length;
   $layer.innerHTML = `
   <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="rep-h">
@@ -206,9 +227,9 @@ function renderFeedback() {
       <div class="pts">${pts}</div>
       ${pinLine}
       <p class="lesson">${esc(c.lesson)}</p>
-      <p class="key">Dowody, które przesądzały:</p>
+      <p class="key">${t.decisiveLbl}</p>
       <ul class="decisive">${decisive}</ul>
-      <button class="go" id="next">${S.trust <= 0 ? 'Odbierz wypowiedzenie' : lastOne ? 'Zamknij dzień' : 'Następne zgłoszenie'}</button>
+      <button class="go" id="next">${S.trust <= 0 ? t.btnFired : lastOne ? t.btnCloseDay : t.btnNext}</button>
     </div>
   </div>`;
   const btn = document.getElementById('next');
@@ -244,21 +265,19 @@ function stats(day) {
 }
 
 function renderDayEnd() {
-  const st = stats(S.day);
+  const t = T(), st = stats(S.day);
   const lastDay = S.day + 1 >= DAYS.length;
-  $app.innerHTML = `
-  <div class="memo">
-    <div class="hdr">KONIEC DNIA ${S.day + 1} · ${DAYS[S.day].date}</div>
-    <h2>${st.bad + st.missed === 0 ? 'Czysta robota. Ani jedna fałszywka nie przeszła.' : st.ok >= 3 ? 'Niezły dzień, ale kilka rzeczy umknęło.' : 'Ciężki dzień. Jutro sprawdzaj dokładniej.'}</h2>
+  $app.innerHTML = memo(`
+    <div class="hdr">${t.dayEndHdr(S.day + 1, t.days[S.day].date)}</div>
+    <h2>${st.bad + st.missed === 0 ? t.dayEndClean : st.ok >= 3 ? t.dayEndOk : t.dayEndBad}</h2>
     <div class="tally">
-      <div><div class="n">${st.ok}</div><div class="l">trafne werdykty</div></div>
-      <div><div class="n">${st.evidence}</div><div class="l">trafnie wskazane dowody</div></div>
-      <div><div class="n">${st.bad}</div><div class="l">błędne werdykty</div></div>
-      <div><div class="n">${st.missed}</div><div class="l">niesprawdzone</div></div>
-      <div><div class="n">${S.trust}%</div><div class="l">zaufanie czytelników</div></div>
+      <div><div class="n">${st.ok}</div><div class="l">${t.tCorrect}</div></div>
+      <div><div class="n">${st.evidence}</div><div class="l">${t.tEvidence}</div></div>
+      <div><div class="n">${st.bad}</div><div class="l">${t.tWrong}</div></div>
+      <div><div class="n">${st.missed}</div><div class="l">${t.tMissed}</div></div>
+      <div><div class="n">${S.trust}%</div><div class="l">${t.tTrust}</div></div>
     </div>
-    <button class="go" id="go">${lastDay ? 'Zobacz ocenę okresu próbnego' : 'Idź do domu, wróć jutro'}</button>
-  </div>`;
+    <button class="go" id="go">${lastDay ? t.btnFinal : t.btnHome}</button>`);
   document.getElementById('go').onclick = () => {
     if (lastDay) S.screen = 'end'; else { S.day++; S.screen = 'dayIntro'; }
     render();
@@ -266,27 +285,24 @@ function renderDayEnd() {
 }
 
 function renderEnd() {
-  const st = stats();
-  const total = totalCases();
+  const t = T(), st = stats();
   const fired = S.trust <= 0;
-  const rank = fired ? 'Zwolnienie dyscyplinarne' : st.ok >= 13 ? 'Starszy weryfikator' : st.ok >= 9 ? 'Weryfikator na etacie' : st.ok >= 5 ? 'Przedłużony okres próbny' : 'Do ponownego szkolenia';
-  $app.innerHTML = `
-  <div class="memo">
-    <div class="hdr">OD: Redaktor naczelna<br>TEMAT: Ocena okresu próbnego</div>
+  const rank = t.rank[fired ? 'fired' : st.ok >= 13 ? 'senior' : st.ok >= 9 ? 'staff' : st.ok >= 5 ? 'extended' : 'retrain'];
+  $app.innerHTML = memo(`
+    <div class="hdr">${t.endHdr}</div>
     <h1>${rank}</h1>
-    <p>${fired ? 'Czytelnicy przestali nam ufać. Zbyt wiele fałszywek przeszło z naszą pieczątką.' : `Rozpatrzone trafnie: ${st.ok} z ${total} zgłoszeń, w tym ${st.evidence} z trafnie wskazanym dowodem. Wynik: ${S.score} pkt.`}</p>
+    <p>${fired ? t.endFired : t.endSummary(st.ok, totalCases(), st.evidence, S.score)}</p>
     <div class="tally">
-      <div><div class="n">${st.ok}</div><div class="l">trafne</div></div>
-      <div><div class="n">${st.evidence}</div><div class="l">z dowodem</div></div>
-      <div><div class="n">${st.bad}</div><div class="l">błędne</div></div>
-      <div><div class="n">${st.missed}</div><div class="l">niesprawdzone</div></div>
-      <div><div class="n">${S.score}</div><div class="l">punkty</div></div>
+      <div><div class="n">${st.ok}</div><div class="l">${t.eCorrect}</div></div>
+      <div><div class="n">${st.evidence}</div><div class="l">${t.eEvidence}</div></div>
+      <div><div class="n">${st.bad}</div><div class="l">${t.eWrong}</div></div>
+      <div><div class="n">${st.missed}</div><div class="l">${t.eMissed}</div></div>
+      <div><div class="n">${S.score}</div><div class="l">${t.eScore}</div></div>
     </div>
-    <h2>Ściąga weryfikatora</h2>
-    <ol class="cheat">${CHEAT.map(x => `<li>${x}</li>`).join('')}</ol>
-    <button class="go" id="go">Zagraj od nowa</button>
-    <p class="hint" style="color:var(--ink-muted);margin-top:12px">Każda rozgrywka losuje inne zgłoszenia.</p>
-  </div>`;
+    <h2>${t.cheatTitle}</h2>
+    <ol class="cheat">${t.cheat.map(x => `<li>${x}</li>`).join('')}</ol>
+    <button class="go" id="go">${t.btnAgain}</button>
+    <p class="again-hint">${t.againHint}</p>`);
   document.getElementById('go').onclick = () => { S = fresh(); render(); };
 }
 
@@ -303,11 +319,13 @@ setInterval(() => {
 
 document.addEventListener('keydown', e => {
   if (S.screen !== 'desk' || e.ctrlKey || e.metaKey || e.altKey) return;
-  const verdict = { p: 'prawda', f: 'falsz', m: 'manipulacja' }[e.key.toLowerCase()];
+  const key = e.key.toLowerCase();
+  const verdict = VERDICTS.find(v => T().verdictKey[v] === key);
   if (verdict) return stamp(verdict);
   const slip = S.used[Number(e.key) - 1];
   if (slip) pin(slip);
 });
 
+applyLang();
 S = fresh();
 render();

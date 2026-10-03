@@ -261,3 +261,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outlin
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* przełącznik języka */
+.langbar { max-width: 680px; margin: 2vh auto -2vh; display: flex; justify-content: flex-end; }
+.bar-actions { display: flex; gap: 8px; align-self: center; }
+.lang {
+  background: transparent; color: var(--desk-fg); border: 1px solid var(--desk-muted); border-radius: 4px;
+  padding: 6px 10px; font: 600 12px var(--font-mono); letter-spacing: .04em;
+}
+.lang:hover { border-color: var(--signal); color: var(--signal); }
+.again-hint { font-size: 13px; color: var(--ink-muted); margin-top: 12px; }
