@@ -12,10 +12,25 @@ let LANG = initialLang();
 let S;
 // caseStart: minuta dnia, w której bieżące zgłoszenie trafiło na biurko — od niej liczy się zasięg.
 // tutorial: samouczek przy pierwszym zgłoszeniu, dopóki gracz raz go nie przejdzie albo nie pominie.
+// mode: 'daily' (wyzwanie dnia — zestaw z ziarnem z daty) albo 'random'; wybierany na ekranie startowym.
+// spotted: ślady wypatrzone lupą na zdjęciu bieżącego zgłoszenia.
 const fresh = () => ({
-  screen: 'intro', run: drawRun(), day: 0, idx: 0, minutes: 0, caseStart: 0,
-  used: [], pin: null, score: 0, trust: 100, log: [], last: null, tutorial: !tutorialDone()
+  screen: 'intro', mode: null, daily: null, run: null, day: 0, idx: 0, minutes: 0, caseStart: 0,
+  used: [], spotted: [], pin: null, score: 0, trust: 100, log: [], last: null, tutorial: !tutorialDone()
 });
+
+function startRun(mode) {
+  S.mode = mode;
+  S.daily = mode === 'daily' ? dailyKey() : null;
+  S.run = drawRun(mode === 'daily' ? seededRandom(S.daily) : Math.random);
+  S.screen = 'dayIntro';
+  Sound.paper();
+  render();
+}
+
+function dailyScore(key) {
+  try { return localStorage.getItem('ds-daily-' + key); } catch (e) { return null; }
+}
 
 function tutorialDone() {
   try { return localStorage.getItem('ds-tutorial') === 'done'; } catch (e) { return false; }
@@ -99,8 +114,18 @@ function renderIntro() {
       ${t.rules(TOOL_COST, PTS_VERDICT, PTS_EVIDENCE).map(r => `<li>${r}</li>`).join('')}
       <li>${t.shortcuts(`${keys} <span class="kbd">1</span>–<span class="kbd">4</span>`)}</li>
     </ul>
-    <button class="go" id="go">${t.introGo}</button>`);
-  document.getElementById('go').onclick = () => { S.screen = 'dayIntro'; Sound.paper(); render(); };
+    <div class="modes">
+      <div class="mode">
+        <button class="go" id="go-daily">${t.modeDaily(dailyNumber(dailyKey()))}</button>
+        <p>${t.modeDailySub}${dailyScore(dailyKey()) !== null ? ` <b>${t.dailyPlayed(dailyScore(dailyKey()))}</b>` : ''}</p>
+      </div>
+      <div class="mode">
+        <button class="go ghost" id="go-random">${t.modeRandom}</button>
+        <p>${t.modeRandomSub}</p>
+      </div>
+    </div>`);
+  document.getElementById('go-daily').onclick = () => startRun('daily');
+  document.getElementById('go-random').onclick = () => startRun('random');
 }
 
 // Skutki decyzji z danego dnia: zgłoszenia, które wróciły w prasie (hasFallout).
@@ -139,12 +164,69 @@ function renderDayIntro() {
     <p>${txt.memo}</p>
     ${nt}
     <button class="go" id="go">${t.dayGo}</button>`);
-  document.getElementById('go').onclick = () => { Sound.click(); S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.caseStart = 0; S.used = []; S.pin = null; render(); };
+  document.getElementById('go').onclick = () => { Sound.click(); S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.caseStart = 0; S.used = []; S.spotted = []; S.pin = null; render(); };
 }
 
 function photoHTML(p) {
   if (!p) return '';
-  return `<div class="photo">${SCENES[p.scene](LANG)}<span>${T().photoCredit} ${esc(p.caption)}</span></div>`;
+  const zoom = S.screen === 'desk' ? `<button class="zoom-btn" id="zoom-open">${T().zoomOpen}</button>` : '';
+  return `<div class="photo">${SCENES[p.scene](LANG)}<span>${T().photoCredit} ${esc(p.caption)}</span>${zoom}</div>`;
+}
+
+// Kartki w teczce: wyniki narzędzi i — gdy gracz coś wypatrzył lupą — kartka „Twoje oko”.
+const slipKeys = () => S.used.concat(S.spotted.length ? ['oko'] : []);
+const clueText = (scene, i) => SCENE_CLUES[scene][i][LANG];
+
+function slipText(c, k) {
+  if (k === 'oko') return S.spotted.map(i => clueText(c.photo.scene, i)).join(' ');
+  return evidenceOf(c, k, LANG)[1];
+}
+
+const slipName = k => k === 'oko' ? T().eyeName : toolName(k);
+
+// Lupa: powiększone zdjęcie, soczewka pod kursorem, kliknięcie sprawdza ślady ze SCENE_CLUES.
+function renderZoom() {
+  const t = T(), c = curCase(), scene = c.photo.scene, svg = SCENES[scene](LANG);
+  $layer.innerHTML = `
+  <div class="overlay zoom" role="dialog" aria-modal="true" aria-label="${t.zoomTitle}">
+    <div class="zoom-box">
+      <p class="zoom-help">${t.zoomHelp}</p>
+      <div class="zoom-stage" id="zoom-stage">${svg}<div class="lens" id="lens" hidden><div class="lens-inner">${svg}</div></div></div>
+      <p class="zoom-msg" id="zoom-msg" aria-live="polite"></p>
+      <button class="go" id="zoom-close">${t.zoomClose}</button>
+    </div>
+  </div>`;
+  const stage = document.getElementById('zoom-stage'), lens = document.getElementById('lens');
+  const inner = lens.firstElementChild, ZOOM = 2.6;
+  const place = e => {
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, half = lens.offsetWidth / 2;
+    lens.hidden = false;
+    lens.style.left = (x - half) + 'px';
+    lens.style.top = (y - half) + 'px';
+    inner.style.width = (r.width * ZOOM) + 'px';
+    inner.style.height = (r.height * ZOOM) + 'px';
+    inner.style.left = (half - x * ZOOM) + 'px';
+    inner.style.top = (half - y * ZOOM) + 'px';
+  };
+  stage.onpointermove = place;
+  stage.onpointerleave = () => { lens.hidden = true; };
+  stage.onclick = e => {
+    place(e);
+    const r = stage.getBoundingClientRect();
+    const sx = (e.clientX - r.left) / r.width * 320, sy = (e.clientY - r.top) / r.height * 180;
+    const clues = SCENE_CLUES[scene] || [];
+    const hit = clues.findIndex(k => Math.hypot(k.x - sx, k.y - sy) <= k.r);
+    const msg = document.getElementById('zoom-msg');
+    msg.classList.remove('found');
+    if (hit < 0) { msg.textContent = t.zoomMiss; return; }
+    if (S.spotted.includes(hit)) { msg.textContent = t.zoomAlready; return; }
+    S.spotted.push(hit);
+    Sound.pin();
+    msg.textContent = t.zoomFound(clueText(scene, hit));
+    msg.classList.add('found');
+  };
+  document.getElementById('zoom-close').onclick = () => { if (S.screen === 'desk') render(); };
+  document.getElementById('zoom-close').focus();
 }
 
 function docHTML(c) {
@@ -177,13 +259,14 @@ function renderDesk() {
     return `<button class="tool${done ? ' done' : ''}" data-tool="${k}" ${!avail || done || !open ? 'disabled' : ''}>
       <b>${toolName(k)}</b><span>${t.tools[k].desc}</span><em>${tag}</em></button>`;
   }).join('');
-  const slips = S.used.length ? S.used.map((k, i) => {
+  const keys = slipKeys();
+  const slips = keys.length ? keys.map((k, i) => {
     const pinned = S.pin === k;
-    return `<button class="slip${pinned ? ' pinned' : ''}" data-pin="${k}" ${open ? '' : 'disabled'} aria-pressed="${pinned}">
-      <span class="h"><span>${i + 1}. ${toolName(k)}</span><i>${pinned ? t.pinned : t.pinMe}</i></span>${esc(evidenceOf(c, k, LANG)[1])}</button>`;
+    return `<button class="slip${pinned ? ' pinned' : ''}${k === 'oko' ? ' eye' : ''}" data-pin="${k}" ${open ? '' : 'disabled'} aria-pressed="${pinned}">
+      <span class="h"><span>${i + 1}. ${slipName(k)}</span><i>${pinned ? t.pinned : t.pinMe}</i></span>${esc(slipText(c, k))}</button>`;
   }).join('') : `<div class="empty">${t.folderEmpty}</div>`;
   const mark = S.screen === 'feedback' && S.last ? `<div class="mark s-${S.last.verdict}">${verdictName(S.last.verdict)}</div>` : '';
-  const n = S.used.length;
+  const n = keys.length;
   // Po pieczątce licznik zamiera na wartości z chwili decyzji.
   const reach = S.screen === 'feedback' && S.last ? S.last.reach : currentReach();
   const step = open && coaching() ? (n === 0 ? 'tools' : !S.pin ? 'read' : 'stamp') : null;
@@ -231,6 +314,8 @@ function renderDesk() {
   $app.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => useTool(b.dataset.tool));
   $app.querySelectorAll('[data-v]').forEach(b => b.onclick = () => stamp(b.dataset.v));
   $app.querySelectorAll('[data-pin]').forEach(b => b.onclick = () => pin(b.dataset.pin));
+  const $zoom = document.getElementById('zoom-open');
+  if ($zoom) $zoom.onclick = () => { Sound.click(); renderZoom(); };
   const $skip = document.getElementById('coach-skip');
   if ($skip) $skip.onclick = () => { finishTutorial(); render(); };
 
@@ -254,7 +339,7 @@ function useTool(k) {
 }
 
 function pin(k) {
-  if (S.screen !== 'desk' || !S.used.includes(k)) return;
+  if (S.screen !== 'desk' || !slipKeys().includes(k)) return;
   S.pin = S.pin === k ? null : k;
   Sound.pin();
   render();
@@ -264,7 +349,8 @@ function stamp(v) {
   if (S.screen !== 'desk') return;
   const c = curCase();
   const correct = v === c.truth;
-  const pinGood = !!S.pin && decisiveTools(c).includes(S.pin);
+  // Ślad wypatrzony lupą zawsze przesądza: SCENE_CLUES są tylko na zdjęciach z fałszywek.
+  const pinGood = S.pin === 'oko' || (!!S.pin && decisiveTools(c).includes(S.pin));
   const pts = correct ? PTS_VERDICT + (pinGood ? PTS_EVIDENCE : 0) : 0;
   const dTrust = correct ? 5 : -20;
   const reach = currentReach();
@@ -283,7 +369,7 @@ function renderFeedback() {
   const t = T(), c = curCase(), L = S.last;
   const head = L.correct ? (L.pinGood ? t.resGood : t.resVerdict) : t.resBad;
   const pts = L.correct ? t.ptsGood(L.pts, L.dTrust) : t.ptsBad(L.dTrust, verdictName(c.truth).toUpperCase());
-  const pinLine = `<p class="pin">${L.pin ? t.pinWas(toolName(L.pin), L.pinGood) : t.pinNone(PTS_EVIDENCE)}</p>`;
+  const pinLine = `<p class="pin">${L.pin ? t.pinWas(slipName(L.pin), L.pinGood) : t.pinNone(PTS_EVIDENCE)}</p>`;
   const isTrue = c.truth === 'prawda', stampedTrue = L.verdict === 'prawda';
   const reachText = isTrue
     ? (stampedTrue ? t.reachTrue(fmt(L.reach)) : t.reachRejected(fmt(L.reach)))
@@ -302,6 +388,8 @@ function renderFeedback() {
       <p class="lesson">${esc(c.lesson)}</p>
       <p class="key">${t.decisiveLbl}</p>
       <ul class="decisive">${decisive}</ul>
+      ${c.photo && SCENE_CLUES[c.photo.scene] ? `<p class="key">${t.clueLbl}</p><ul class="decisive clues">${SCENE_CLUES[c.photo.scene].map((k, i) =>
+        `<li><b>${S.spotted.includes(i) ? t.clueFound : t.clueMissed}</b>${esc(k[LANG])}</li>`).join('')}</ul>` : ''}
       <button class="go" id="next">${S.trust <= 0 ? t.btnFired : lastOne ? t.btnCloseDay : t.btnNext}</button>
     </div>
   </div>`;
@@ -312,7 +400,7 @@ function renderFeedback() {
 
 function next() {
   if (S.trust <= 0) { S.screen = 'end'; return render(); }
-  S.idx++; S.used = []; S.pin = null; S.last = null; S.caseStart = S.minutes;
+  S.idx++; S.used = []; S.spotted = []; S.pin = null; S.last = null; S.caseStart = S.minutes;
   if (S.idx >= dayCases().length) return endDay();
   S.screen = 'desk';
   render();
@@ -371,7 +459,8 @@ function shareText(st, spread) {
   const days = DAYS.map((_, d) => S.log.filter(x => x.day === d)).filter(l => l.length)
     .map((l, d) => `${t.shareDay(d + 1)} ${l.map(SQUARE).join('')}`);
   const origin = /^https?:/.test(location.protocol) ? location.origin : 'https://vitrino.pl';
-  return [t.shareHead(st.ok, totalCases(), S.score), ...days, t.shareSpread(spread ? fmt(spread) : 0),
+  const head = S.mode === 'daily' ? t.shareHeadDaily(dailyNumber(S.daily), st.ok, totalCases(), S.score) : t.shareHead(st.ok, totalCases(), S.score);
+  return [head, ...days, t.shareSpread(spread ? fmt(spread) : 0),
     `${origin}/${LANG === 'en' ? '?lang=en' : ''}`].join('\n');
 }
 
@@ -401,6 +490,9 @@ function renderEnd() {
   const rank = t.rank[fired ? 'fired' : st.ok >= 13 ? 'senior' : st.ok >= 9 ? 'staff' : st.ok >= 5 ? 'extended' : 'retrain'];
   const spread = S.log.reduce((sum, x) => sum + harmfulReach(x), 0);
   const card = shareText(st, spread);
+  if (S.mode === 'daily' && dailyScore(S.daily) === null) {
+    try { localStorage.setItem('ds-daily-' + S.daily, String(S.score)); } catch (e) { /* zablokowany storage */ }
+  }
   $app.innerHTML = memo(`
     <div class="hdr">${t.endHdr}</div>
     <h1>${rank}</h1>
@@ -422,6 +514,7 @@ function renderEnd() {
       </div>
       <p class="again-hint" id="share-note" aria-live="polite"></p>
     </section>
+    ${profileHTML()}
     ${pressHTML(falloutOf(S.day), t.finalPressTitle, S.day + 1 < DAYS.length ? t.days[S.day + 1].date : t.pressFinalDate)}
     <h2>${t.cheatTitle}</h2>
     <ol class="cheat">${t.cheat.map(x => `<li>${x}</li>`).join('')}</ol>
@@ -429,6 +522,29 @@ function renderEnd() {
     <p class="again-hint">${t.againHint}</p>`);
   document.getElementById('go').onclick = () => { S = fresh(); render(); };
   bindShare(card);
+}
+
+// Profil: w jakich rodzajach zgłoszeń gracz dał się nabrać. Liczą się tylko pomyłki ze skutkami
+// (hasFallout) — pomylenie fałszu z manipulacją nie jest nabraniem się.
+function profileHTML() {
+  const t = T(), by = {};
+  S.log.forEach(x => {
+    const type = POOL[x.id].type;
+    by[type] = by[type] || { seen: 0, fooled: 0 };
+    by[type].seen++;
+    if (hasFallout(POOL[x.id], x.verdict)) by[type].fooled++;
+  });
+  const entries = Object.entries(by);
+  const rate = v => v.fooled / v.seen;
+  const weak = entries.filter(([, v]) => v.fooled > 0).sort((a, b) => rate(b[1]) - rate(a[1]) || b[1].fooled - a[1].fooled).slice(0, 2);
+  const strong = entries.filter(([, v]) => v.fooled === 0 && v.seen >= 2).sort((a, b) => b[1].seen - a[1].seen).slice(0, 3);
+  const weakHTML = weak.length
+    ? `<h3>${t.profileWeak}</h3><ul class="weak">${weak.map(([k, v]) =>
+        `<li><b>${t.types[k].name}</b> <span class="count">${t.profileCount(v.fooled, v.seen)}</span><p>${t.types[k].tip}</p></li>`).join('')}</ul>`
+    : `<p class="quiet">${t.profileClean}</p>`;
+  const strongHTML = strong.length
+    ? `<h3>${t.profileStrong}</h3><p class="strong">${strong.map(([k]) => t.types[k].name).join(' · ')}</p>` : '';
+  return `<section class="profile"><h2>${t.profileTitle}</h2>${weakHTML}${strongHTML}</section>`;
 }
 
 // zegar
@@ -453,7 +569,7 @@ document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const verdict = VERDICTS.find(v => T().verdictKey[v] === key);
   if (verdict) return stamp(verdict);
-  const slip = S.used[Number(e.key) - 1];
+  const slip = slipKeys()[Number(e.key) - 1];
   if (slip) pin(slip);
 });
 

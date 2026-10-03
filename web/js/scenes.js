@@ -14,6 +14,22 @@ const SCENE_TEXT = {
   en: { tv: { label: 'BREAKING', labelSize: 9.5, headline: 'NATIONWIDE CURFEW FROM SATURDAY', ticker: 'WHOLE COUNTRY • 20:00 TO 6:00 • DETAILS TO FOLLOW' } }
 };
 
+// Ślady, które gracz może wypatrzyć lupą (współrzędne w układzie sceny 320×180, r — promień
+// trafienia). Są tylko na zdjęciach z fałszywek i manipulacji, więc wypatrzony ślad zawsze
+// przesądza sprawę. Te same ślady opisuje wyszukiwanie obrazem.
+const SCENE_CLUES = {
+  wolf: [
+    { x: 96, y: 150, r: 22, pl: 'Wilk w odbiciu w kałuży ma pięć łap.', en: 'The wolf’s reflection in the puddle has five legs.' },
+    { x: 248, y: 72, r: 18, pl: 'Łańcuch huśtawki wrasta w pień drzewa.', en: 'The swing chain grows into the tree trunk.' }
+  ],
+  shark: [
+    { x: 150, y: 146, r: 20, pl: 'Cień płetwy pada w lewo, a cienie filarów mostu w prawo.', en: 'The fin’s shadow falls left while the bridge piers’ shadows fall right.' }
+  ],
+  fuel: [
+    { x: 120, y: 82, r: 26, pl: 'Ceny na pylonie są w euro, a nie w złotówkach.', en: 'The prices on the sign are in euros, not złoty.' }
+  ]
+};
+
 function svgScene(defs, body) {
   return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>${defs}</defs>${body}</svg>`;
 }
@@ -384,4 +400,4 @@ function quoteCard(bg, ring, glasses) {
     <rect x="150" y="144" width="70" height="4" rx="2" fill="#ffffff" opacity=".6"/>`);
 }
 
-if (typeof module !== 'undefined') module.exports = { SCENES };
+if (typeof module !== 'undefined') module.exports = { SCENES, SCENE_CLUES };

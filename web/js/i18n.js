@@ -100,6 +100,32 @@ const UI = {
     coachRead: 'Wynik trafił do teczki. Przeczytaj go. Możesz sprawdzić jeszcze datę albo kliknąć kartkę, która twoim zdaniem przesądza sprawę.',
     coachStamp: 'Teraz pieczątka. Prawda, fałsz czy manipulacja? Po werdykcie zobaczysz, co przesądzało.',
     coachSkip: 'Pomiń samouczek',
+
+    modeDaily: n => `Wyzwanie dnia #${n}`,
+    modeDailySub: 'Wszyscy grają dziś te same zgłoszenia. Porównaj wynik ze znajomymi.',
+    modeRandom: 'Losowa zmiana', modeRandomSub: 'Za każdym razem inne zgłoszenia.',
+    dailyPlayed: p => `Twój dzisiejszy wynik: ${p} pkt. Możesz zagrać jeszcze raz.`,
+    shareHeadDaily: (n, ok, total, score) => `Don’t Share #${n} · ${ok}/${total} · ${score} pkt`,
+
+    zoomOpen: '⌕ Powiększ', zoomTitle: 'Lupa',
+    zoomHelp: 'Wodź lupą po zdjęciu. Kliknij miejsce, które wydaje ci się podejrzane. Zegar tyka dalej.',
+    zoomClose: 'Wróć do biurka', zoomFound: x => `Wypatrzone: ${x} Trafiło do teczki.`,
+    zoomMiss: 'W tym miejscu nic nie budzi podejrzeń.', zoomAlready: 'To już jest w teczce.',
+    eyeName: 'Twoje oko', clueLbl: 'Do wypatrzenia na zdjęciu:', clueFound: 'wypatrzone', clueMissed: 'przeoczone',
+
+    profileTitle: 'Twój profil weryfikatora', profileWeak: 'Tu było najtrudniej', profileStrong: 'Tu nie dajesz się nabrać',
+    profileClean: 'Żaden rodzaj fałszywki cię nie zmylił.', profileCount: (f, n) => `${f} z ${n}`,
+    types: {
+      impostor: { name: 'Podszywanie się i wyłudzenia', tip: 'Sprawdzaj adres i nazwę konta znak po znaku. Nikt uczciwy nie prosi o dane karty w poście.' },
+      emotion: { name: 'Cudowne kuracje i sensacje', tip: 'Im mocniej tekst gra na emocjach, tym spokojniej go sprawdzaj. Szukaj autora i drugiego źródła.' },
+      oldNews: { name: 'Stare wiadomości podane jako nowe', tip: 'Patrz na datę publikacji oryginału, nie na datę udostępnienia.' },
+      photoContext: { name: 'Zdjęcia z innego miejsca i czasu', tip: 'Wyszukaj zdjęcie obrazem, zanim uwierzysz w podpis.' },
+      fabricated: { name: 'Obrazy z AI, fotomontaże i fałszywe zrzuty', tip: 'Powiększaj i szukaj błędów: odbicia, cienie, dłonie, napisy. Sprawdź, czy materiał jest u samego źródła.' },
+      satire: { name: 'Satyra wzięta na serio', tip: 'Zanim się oburzysz, sprawdź, czym jest strona źródłowa.' },
+      quote: { name: 'Ucięte i zmyślone cytaty', tip: 'Szukaj pełnej wypowiedzi i sprawdź, czy autor cytatu w ogóle istnieje.' },
+      stats: { name: 'Przekręcone badania i liczby', tip: 'Pytaj: ile osób, z ilu, kto badał. Procent z małej liczby niewiele znaczy.' },
+      real: { name: 'Prawdziwe, choć zaskakujące wiadomości', tip: 'Nie każda dobra, nudna czy nietypowa wiadomość jest fałszywa. Weryfikuj, zanim odrzucisz.' }
+    },
     photoCredit: 'FOT.:', shares: s => `↻ ${s} udostępnień`, reported: 'Zgłoszono jako podejrzane',
 
     resGood: 'Trafnie i z dowodem.', resVerdict: 'Trafny werdykt.', resBad: 'Błędny werdykt.',
@@ -218,6 +244,32 @@ const UI = {
     coachRead: 'The result is in your folder. Read it. You can also check the date, or click the slip you think decides the case.',
     coachStamp: 'Now the stamp. True, false or misleading? After the verdict you’ll see what decided it.',
     coachSkip: 'Skip tutorial',
+
+    modeDaily: n => `Daily challenge #${n}`,
+    modeDailySub: 'Everyone plays the same reports today. Compare your score with friends.',
+    modeRandom: 'Random shift', modeRandomSub: 'Different reports every time.',
+    dailyPlayed: p => `Your score today: ${p} pts. You can play again.`,
+    shareHeadDaily: (n, ok, total, score) => `Don’t Share #${n} · ${ok}/${total} · ${score} pts`,
+
+    zoomOpen: '⌕ Zoom', zoomTitle: 'Magnifier',
+    zoomHelp: 'Move the magnifier over the photo. Click anything that looks suspicious. The clock keeps running.',
+    zoomClose: 'Back to the desk', zoomFound: x => `Spotted: ${x} Added to your folder.`,
+    zoomMiss: 'Nothing suspicious here.', zoomAlready: 'That’s already in your folder.',
+    eyeName: 'Your eye', clueLbl: 'To spot in the photo:', clueFound: 'spotted', clueMissed: 'missed',
+
+    profileTitle: 'Your fact-checker profile', profileWeak: 'Where it was hardest', profileStrong: 'Where you don’t get fooled',
+    profileClean: 'No kind of fake fooled you.', profileCount: (f, n) => `${f} of ${n}`,
+    types: {
+      impostor: { name: 'Impostors and scams', tip: 'Check the address and account name character by character. No honest sender asks for card details in a post.' },
+      emotion: { name: 'Miracle cures and sensations', tip: 'The harder a story pulls at your emotions, the calmer you should check it. Look for an author and a second source.' },
+      oldNews: { name: 'Old news passed off as new', tip: 'Look at the original publication date, not the date it was shared.' },
+      photoContext: { name: 'Photos from another place and time', tip: 'Run a reverse image search before you believe the caption.' },
+      fabricated: { name: 'AI images, photomontages and fake screenshots', tip: 'Zoom in and look for errors: reflections, shadows, hands, lettering. Check whether the source itself has the material.' },
+      satire: { name: 'Satire taken seriously', tip: 'Before you get outraged, check what the source site is.' },
+      quote: { name: 'Cut and invented quotes', tip: 'Find the full statement and check that the person quoted actually exists.' },
+      stats: { name: 'Twisted studies and numbers', tip: 'Ask: how many people, out of how many, who did the study. A percentage of a small number means little.' },
+      real: { name: 'True but surprising news', tip: 'Not every good, boring or unusual story is fake. Verify before you dismiss.' }
+    },
     photoCredit: 'PHOTO:', shares: s => `↻ ${s} shares`, reported: 'Reported as suspicious',
 
     resGood: 'Correct, with evidence.', resVerdict: 'Correct verdict.', resBad: 'Wrong verdict.',

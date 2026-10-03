@@ -22,7 +22,7 @@ const DAYS = [
 
 const POOL = [
   // ---------- poziom 1: źródło i data ----------
-  { tier: 1, kind: 'article', truth: 'falsz', reporter: 'Czytelniczka z Torunia',
+  { tier: 1, type: 'impostor', kind: 'article', truth: 'falsz', reporter: 'Czytelniczka z Torunia',
     article: { url: 'gazeta-nadwislanska.info/pilne/zakaz-aut', outlet: 'Gazeta Nadwiślańska',
       headline: 'PILNE: Od poniedziałku zakaz wjazdu aut spalinowych do miast powyżej 50 tys. mieszkańców',
       author: 'Redakcja', date: '5.10.2026, 0:14',
@@ -33,7 +33,7 @@ const POOL = [
     fallout: { headline: 'Panika w salonach samochodowych po fałszywym „zakazie aut”',
       body: 'Tekst z podrobionej domeny udostępniono 200 tys. razy. Ministerstwo musiało wydać dementi.' } },
 
-  { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Kierowca z Sieradza',
+  { tier: 1, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Kierowca z Sieradza',
     article: { url: 'gazetanadwislanska.pl/region/most-lipowa-remont', outlet: 'Gazeta Nadwiślańska',
       headline: 'Most na Lipowej w Sieradzu zamknięty od 14 października',
       author: 'Anna Wróbel', date: '5.10.2026, 7:40',
@@ -44,7 +44,7 @@ const POOL = [
     fallout: { headline: 'Kierowcy zaskoczeni zamknięciem mostu na Lipowej',
       body: 'Oznaczyliśmy prawdziwy komunikat jako fałszywy. Rano na objeździe stanęły korki, a zarząd dróg pyta, czemu podważamy jego ogłoszenia.' } },
 
-  { tier: 1, kind: 'post', truth: 'falsz', reporter: 'Zaniepokojony tata',
+  { tier: 1, type: 'emotion', kind: 'post', truth: 'falsz', reporter: 'Zaniepokojony tata',
     post: { name: 'Zdrowie Bez Tajemnic', handle: '@zdrowie.bez.tajemnic', time: '3 godz.',
       text: 'Sok z cytryny z sodą oczyszczoną leczy grypę w 24 godziny! Koncerny farmaceutyczne nie chcą, żebyś to wiedział. Lekarze milczą!!!',
       shares: '42 tys.' },
@@ -54,7 +54,7 @@ const POOL = [
     fallout: { headline: 'Lekarze: chorzy na grypę leczą się sodą zamiast iść do przychodni',
       body: 'Przychodnie zgłaszają pacjentów, którzy uwierzyli w „cudowną kurację”. Sklep z suplementami podwoił sprzedaż.' } },
 
-  { tier: 1, kind: 'post', truth: 'manipulacja', reporter: 'Studentka z Lublina',
+  { tier: 1, type: 'oldNews', kind: 'post', truth: 'manipulacja', reporter: 'Studentka z Lublina',
     post: { name: 'Info Na Już', handle: '@InfoNaJuz', time: '25 min',
       text: 'Dzieje się TERAZ! Centrum Zamościa pod wodą. Gdzie są służby?!',
       shares: '9,1 tys.',
@@ -65,7 +65,7 @@ const POOL = [
     fallout: { headline: 'Straż pożarna w Zamościu: dziesiątki zgłoszeń o powodzi, której nie ma',
       body: 'Stary artykuł o ulewie z 2019 r. zablokował linię alarmową na pół dnia.' } },
 
-  { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Uczeń z Sieradza',
+  { tier: 1, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Uczeń z Sieradza',
     article: { url: 'mpk.sieradz.pl/aktualnosci/bilet-uczniowski', outlet: 'MPK Sieradz · komunikat',
       headline: 'Od 1 listopada miesięczny bilet dla uczniów za 1 zł',
       author: 'Dział obsługi pasażera', date: '5.10.2026, 9:00',
@@ -76,7 +76,7 @@ const POOL = [
     fallout: { headline: 'Uczniowie przegapili zapisy na bilet za 1 zł',
       body: 'Uznaliśmy komunikat przewoźnika za oszustwo. Rodzice piszą z pretensjami, a MPK prosi o sprostowanie.' } },
 
-  { tier: 1, kind: 'post', truth: 'manipulacja', reporter: 'Mama dwójki uczniów',
+  { tier: 1, type: 'oldNews', kind: 'post', truth: 'manipulacja', reporter: 'Mama dwójki uczniów',
     post: { name: 'Rodzice Mazowsza', handle: '@RodziceMazowsza', time: '50 min',
       text: 'Od jutra wszystkie szkoły w województwie przechodzą na nauczanie zdalne! Kuratorium potwierdza. Przekażcie dalej!',
       shares: '21 tys.',
@@ -87,7 +87,7 @@ const POOL = [
     fallout: { headline: 'Rodzice zostali w domu z dziećmi przez stary artykuł',
       body: 'Tysiące uczniów nie przyszło do szkół po udostępnieniu tekstu sprzed sześciu lat. Kuratorium dementuje.' } },
 
-  { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Wolontariuszka',
+  { tier: 1, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Wolontariuszka',
     article: { url: 'gazetanadwislanska.pl/region/bank-zywnosci-zbiorka', outlet: 'Gazeta Nadwiślańska',
       headline: 'W sobotę zbiórka Banku Żywności w 40 sklepach regionu',
       author: 'Marta Kowalczyk', date: '5.10.2026, 8:10',
@@ -98,7 +98,7 @@ const POOL = [
     fallout: { headline: 'Zbiórka Banku Żywności zebrała połowę zakładanych darów',
       body: 'Nasza pieczątka „fałsz” krążyła w sieci. Część darczyńców uznała zbiórkę za oszustwo.' } },
 
-  { tier: 1, kind: 'post', truth: 'falsz', reporter: 'Senior z Radomia',
+  { tier: 1, type: 'impostor', kind: 'post', truth: 'falsz', reporter: 'Senior z Radomia',
     post: { name: 'Dodatek Energetyczny 2026', handle: '@dodatek.energetyczny.gov', time: '4 godz.',
       text: 'Rząd wypłaca 800 zł dodatku energetycznego każdemu gospodarstwu! Złóż wniosek do piątku: dodatek-energia-gov.pl.com. Potrzebny tylko login do banku.',
       shares: '12 tys.' },
@@ -108,7 +108,7 @@ const POOL = [
     fallout: { headline: 'Seniorzy stracili oszczędności przez fałszywy „dodatek energetyczny”',
       body: 'Policja przyjęła 40 zgłoszeń wyłudzeń. Poszkodowani mówią, że nikt nie ostrzegł ich przed formularzem.' } },
 
-  { tier: 1, kind: 'article', truth: 'falsz', reporter: 'Fanka seriali',
+  { tier: 1, type: 'emotion', kind: 'article', truth: 'falsz', reporter: 'Fanka seriali',
     article: { url: 'plotki-teraz24.xyz/gwiazdy/nie-zyje-aktor', outlet: 'Plotki Teraz 24',
       headline: 'Nie żyje Jan Wiatrowski. Gwiazdor serialu „Dom nad Wartą” miał 58 lat',
       author: 'Redakcja', date: '5.10.2026, 6:02',
@@ -119,7 +119,7 @@ const POOL = [
     fallout: { headline: 'Jan Wiatrowski: „Uśmierciliście mnie po raz trzeci”',
       body: 'Aktor nagrał ironiczne wideo o fałszywym nekrologu. W komentarzach pytania, czemu nikt tego nie sprawdził.' } },
 
-  { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec osiedla Słonecznego',
+  { tier: 1, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec osiedla Słonecznego',
     article: { url: 'siec-centrum.pl/komunikaty/wylaczenia-pradu', outlet: 'Sieć Energetyczna Centrum · komunikat',
       headline: 'Planowane wyłączenie prądu: osiedle Słoneczne, piątek 9 października, 8:00–14:00',
       author: 'Dział komunikacji', date: '5.10.2026, 7:30',
@@ -131,7 +131,7 @@ const POOL = [
       body: 'Uznaliśmy komunikat operatora za fałszywkę. Mieszkańcy nie przygotowali się na wyłączenie, a lodówki stały ciepłe sześć godzin.' } },
 
   // ---------- poziom 2: zdjęcia ----------
-  { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Emerytka z Kielc',
+  { tier: 2, type: 'photoContext', kind: 'post', truth: 'manipulacja', reporter: 'Emerytka z Kielc',
     post: { name: 'Kierowca Polska', handle: '@Kierowca_Polska', time: '1 godz.',
       text: 'Tak wyglądają DZIŚ stacje w całym kraju! Paliwa zaraz zabraknie, tankujcie, ile się da!!!',
       shares: '27 tys.' },
@@ -143,7 +143,7 @@ const POOL = [
     fallout: { headline: 'Kolejki na stacjach po fałszywym zdjęciu',
       body: 'Kierowcy tankowali na zapas po wpisie ze zdjęciem z 2022 r. Na dwóch stacjach w Kielcach naprawdę zabrakło paliwa.' } },
 
-  { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Mama z Krakowa',
+  { tier: 2, type: 'fabricated', kind: 'post', truth: 'falsz', reporter: 'Mama z Krakowa',
     post: { name: 'Kraków News 24', handle: '@KrakowNews_24', time: '40 min',
       text: 'UWAGA! Wilk na placu zabaw przy Plantach! Nie wypuszczajcie dzieci z domu!',
       shares: '15 tys.' },
@@ -155,7 +155,7 @@ const POOL = [
     fallout: { headline: 'Szkoły przy Plantach zamknęły place zabaw przez wilka z AI',
       body: 'Straż miejska przeszukała park. Wilka nie było, był tylko obraz z generatora.' } },
 
-  { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Kierowca autobusu',
+  { tier: 2, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Kierowca autobusu',
     article: { url: 'lublinteraz.pl/miasto/autobusy-elektryczne', outlet: 'Lublin Teraz',
       headline: 'Na ulice Lublina wyjechało 20 nowych autobusów elektrycznych',
       author: 'Piotr Szymczak', date: '6.10.2026, 10:02',
@@ -168,7 +168,7 @@ const POOL = [
     fallout: { headline: 'Przewoźnik z Lublina: nasze autobusy istnieją',
       body: 'Nazwaliśmy prawdziwe zdjęcie fałszywym. Przewoźnik opublikował wideo z zajezdni i prosi o sprostowanie.' } },
 
-  { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Nauczyciel WOS-u',
+  { tier: 2, type: 'satire', kind: 'post', truth: 'falsz', reporter: 'Nauczyciel WOS-u',
     post: { name: 'Marek Patriota', handle: '@Marek.Patriota', time: '2 godz.',
       text: 'SKANDAL!!! Tego jeszcze nie było. Udostępniajcie, niech ludzie wiedzą!',
       shares: '6,3 tys.',
@@ -181,7 +181,7 @@ const POOL = [
     fallout: { headline: 'Szyderca.pl dziękuje za reklamę',
       body: 'Serwis satyryczny chwali się rekordem odsłon, odkąd tekst o „likwidacji poniedziałków” uznano za prawdziwy.' } },
 
-  { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec Widzewa',
+  { tier: 2, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec Widzewa',
     article: { url: 'lodznabiezaco.pl/wydarzenia/pozar-hali-widzew', outlet: 'Łódź na Bieżąco',
       headline: 'Pożar hali magazynowej na Widzewie. Nikt nie został ranny',
       author: 'Karolina Mazur', date: '6.10.2026, 6:50 (akt. 9:10)',
@@ -194,7 +194,7 @@ const POOL = [
     fallout: { headline: 'Mieszkańcy Widzewa nie zamknęli okien',
       body: 'Ostrzeżenie o dymie uznaliśmy za fałszywe. Dwie osoby trafiły do szpitala z podrażnieniem dróg oddechowych.' } },
 
-  { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Student z Wrocławia',
+  { tier: 2, type: 'photoContext', kind: 'post', truth: 'manipulacja', reporter: 'Student z Wrocławia',
     post: { name: 'Głos Ludu', handle: '@GlosLudu_PL', time: '3 godz.',
       text: 'Wczoraj pół miliona ludzi na ulicach Warszawy! Media milczą, ale zdjęcia nie kłamią.',
       shares: '38 tys.' },
@@ -206,7 +206,7 @@ const POOL = [
     fallout: { headline: 'Spór o liczby po fałszywym zdjęciu tłumu',
       body: 'Zdjęcie z festiwalu krążyło jako dowód „pół miliona ludzi”. Zaufanie do relacji z demonstracji spadło po obu stronach.' } },
 
-  { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Wędkarz spod Płocka',
+  { tier: 2, type: 'fabricated', kind: 'post', truth: 'falsz', reporter: 'Wędkarz spod Płocka',
     post: { name: 'Mazowsze Alarm', handle: '@MazowszeAlarm', time: '1 godz.',
       text: 'REKIN W WIŚLE pod Płockiem!!! Wędkarze uciekają z brzegu. Nikt nie mówi, skąd się wziął!',
       shares: '64 tys.' },
@@ -218,7 +218,7 @@ const POOL = [
     fallout: { headline: 'Wędkarze omijają Wisłę przez fotomontaż rekina',
       body: 'Ośrodek sportów wodnych w Płocku odwołał zajęcia. Biolodzy przypominają, że rekiny nie żyją w słodkiej wodzie.' } },
 
-  { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Turystka z Gdańska',
+  { tier: 2, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Turystka z Gdańska',
     article: { url: 'tatrytu.pl/pogoda/pierwszy-snieg', outlet: 'Tatry Tu',
       headline: 'Pierwszy śnieg w Zakopanem. Na Kasprowym 15 cm',
       author: 'Wojciech Gąsienica', date: '6.10.2026, 7:45',
@@ -231,7 +231,7 @@ const POOL = [
     fallout: { headline: 'Turyści ruszyli w Tatry w trampkach',
       body: 'Uznaliśmy informację o śniegu za fałsz. Ratownicy sprowadzili ze szlaków kilkanaście osób bez zimowego sprzętu.' } },
 
-  { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Radna osiedla',
+  { tier: 2, type: 'photoContext', kind: 'post', truth: 'manipulacja', reporter: 'Radna osiedla',
     post: { name: 'Kraków Bez Ściemy', handle: '@KrakowBezSciemy', time: '2 godz.',
       text: 'Tak wygląda park po wczorajszym miejskim festiwalu. Za nasze podatki!',
       shares: '8,7 tys.' },
@@ -243,7 +243,7 @@ const POOL = [
     fallout: { headline: 'Organizatorzy festiwalu żądają przeprosin',
       body: 'Zdjęcie śmieci z innego miasta przypięto do miejskiego festiwalu. Sprzątający pokazali zdjęcia czystego parku z rana.' } },
 
-  { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Kierowca taksówki',
+  { tier: 2, type: 'fabricated', kind: 'post', truth: 'falsz', reporter: 'Kierowca taksówki',
     post: { name: 'Ostatnia Chwila', handle: '@ostatnia_chwila_pl', time: '35 min',
       text: 'Właśnie pokazali w telewizji! Od soboty godzina policyjna w całym kraju!!!',
       shares: '47 tys.' },
@@ -256,7 +256,7 @@ const POOL = [
       body: 'Spreparowany zrzut paska z telewizji wywołał zakupy na zapas. Stacja zapowiada pozew przeciw autorom fałszywki.' } },
 
   // ---------- poziom 3: dokumenty ----------
-  { tier: 3, kind: 'post', truth: 'manipulacja', reporter: 'Pielęgniarka z Gdańska',
+  { tier: 3, type: 'quote', kind: 'post', truth: 'manipulacja', reporter: 'Pielęgniarka z Gdańska',
     post: { name: 'Polityka Bez Cenzury', handle: '@PolitykaBezCenzury', time: '1 godz.',
       text: 'Minister zdrowia: „Szczepienia dzieci nie mają sensu”. Sami to przyznali!',
       shares: '33 tys.' },
@@ -269,7 +269,7 @@ const POOL = [
     fallout: { headline: 'Mniej zapisów na szczepienia dzieci',
       body: 'Ucięty cytat ministra krążył jako „przyznanie się”. Przychodnie notują odwołane wizyty.' } },
 
-  { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Kawiarz z Poznania',
+  { tier: 3, type: 'stats', kind: 'article', truth: 'manipulacja', reporter: 'Kawiarz z Poznania',
     article: { url: 'zdrowiedzis.pl/nauka/kawa-zawal', outlet: 'Zdrowie Dziś',
       headline: 'Naukowcy alarmują: kawa podwaja ryzyko zawału!',
       author: 'Redakcja', date: '7.10.2026, 8:30',
@@ -283,7 +283,7 @@ const POOL = [
     fallout: { headline: 'Kawiarnie: klienci pytają, czy kawa ich zabije',
       body: 'Tekst o badaniu na myszach udostępniono 90 tys. razy. Kardiolodzy tłumaczą w telewizji, że nie ma powodów do paniki.' } },
 
-  { tier: 3, kind: 'article', truth: 'prawda', reporter: 'Rolnik spod Płocka',
+  { tier: 3, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Rolnik spod Płocka',
     article: { url: 'gazetanadwislanska.pl/kraj/wrzesien-rekord-temperatury', outlet: 'Gazeta Nadwiślańska',
       headline: 'Wrzesień 2026 najcieplejszy w historii pomiarów w Polsce',
       author: 'Tomasz Lis-Kowalczyk', date: '7.10.2026, 11:15',
@@ -297,7 +297,7 @@ const POOL = [
     fallout: { headline: 'Służba meteorologiczna prostuje nasze „sprostowanie”',
       body: 'Oznaczyliśmy dane o rekordowym wrześniu jako nieprawdziwe. Nasza pieczątka trafiła na profile, które zaprzeczają zmianom klimatu.' } },
 
-  { tier: 3, kind: 'post', truth: 'falsz', reporter: 'Fan gier, 13 lat',
+  { tier: 3, type: 'impostor', kind: 'post', truth: 'falsz', reporter: 'Fan gier, 13 lat',
     post: { name: 'Kuba Gra', handle: '@kubagra_offical', time: '12 min',
       text: 'Rozdaję 500 smartfonów z okazji 5 mln subów!!! Kliknij link i podaj dane karty, żeby opłacić wysyłkę 9,99 zł. Tylko do północy!',
       shares: '51 tys.' },
@@ -310,7 +310,7 @@ const POOL = [
     fallout: { headline: 'Dzieci podały dane kart rodziców w fałszywym konkursie',
       body: 'Bank blokuje setki kart po „rozdaniu smartfonów”. Prawdziwy Kuba Gra ostrzega widzów na swoim kanale.' } },
 
-  { tier: 3, kind: 'article', truth: 'falsz', reporter: 'Dyrektorka szkoły',
+  { tier: 3, type: 'stats', kind: 'article', truth: 'falsz', reporter: 'Dyrektorka szkoły',
     article: { url: 'gco-news.pl/edukacja/raport-czytanie', outlet: 'Gazeta Codzienna Online',
       headline: 'Raport: 70% polskich uczniów nie rozumie czytanego tekstu',
       author: 'brak podpisu', date: '7.10.2026, 7:05',
@@ -322,7 +322,7 @@ const POOL = [
     fallout: { headline: 'Instytut: nie publikowaliśmy raportu o 70%',
       body: 'Zmyślona liczba trafiła do debaty w radzie miasta. Instytut zapowiada skargę.' } },
 
-  { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Rodzic nastolatka',
+  { tier: 3, type: 'stats', kind: 'article', truth: 'manipulacja', reporter: 'Rodzic nastolatka',
     article: { url: 'gamingnews.pl/nauka/gry-iq', outlet: 'Gaming News',
       headline: 'Naukowcy potwierdzają: gry komputerowe podnoszą IQ o 20 punktów',
       author: 'Bartek Nowicki', date: '7.10.2026, 9:20',
@@ -336,7 +336,7 @@ const POOL = [
     fallout: { headline: 'Rodzice kupują gry „na inteligencję”',
       body: 'Nagłówek o 20 punktach IQ trafił do reklam sklepów z grami. Autorzy badania prostują w mediach.' } },
 
-  { tier: 3, kind: 'article', truth: 'prawda', reporter: 'Pedagożka szkolna',
+  { tier: 3, type: 'real', kind: 'article', truth: 'prawda', reporter: 'Pedagożka szkolna',
     article: { url: 'gazetanadwislanska.pl/kraj/raport-hejt-uczniowie', outlet: 'Gazeta Nadwiślańska',
       headline: 'Raport: co trzeci uczeń doświadczył hejtu w sieci',
       author: 'Ewa Domańska', date: '7.10.2026, 10:05',
@@ -348,7 +348,7 @@ const POOL = [
     fallout: { headline: 'Rzecznik praw uczniowskich: podważanie raportu szkodzi ofiarom hejtu',
       body: 'Uznaliśmy rzetelny raport za niewiarygodny. Szkoły wstrzymały program przeciw hejtowi „do wyjaśnienia sprawy”.' } },
 
-  { tier: 3, kind: 'post', truth: 'falsz', reporter: 'Licealista',
+  { tier: 3, type: 'quote', kind: 'post', truth: 'falsz', reporter: 'Licealista',
     post: { name: 'Mądre Cytaty', handle: '@madre.cytaty', time: '5 godz.',
       text: '„Kto czyta wiadomości tylko z internetu, ten wie mniej niż ten, kto nie czyta wcale.” — prof. Zbigniew Halicki, laureat Nagrody Nobla',
       shares: '19 tys.' },
@@ -361,7 +361,7 @@ const POOL = [
     fallout: { headline: 'Nieistniejący noblista cytowany na sesji rady miasta',
       body: 'Cytat „prof. Halickiego” padł w przemówieniu radnego. Nagranie stało się memem.' } },
 
-  { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Mieszkanka Zielonej Doliny',
+  { tier: 3, type: 'stats', kind: 'article', truth: 'manipulacja', reporter: 'Mieszkanka Zielonej Doliny',
     article: { url: 'gmina-info24.pl/bezpieczenstwo/przestepczosc', outlet: 'Gmina Info 24',
       headline: 'Przestępczość w Zielonej Dolinie wzrosła o 100%! Mieszkańcy boją się wychodzić z domu',
       author: 'Redakcja', date: '7.10.2026, 6:40',
@@ -375,7 +375,7 @@ const POOL = [
     fallout: { headline: 'Mieszkańcy Zielonej Doliny chcą prywatnej ochrony',
       body: 'Po tekście o „wzroście przestępczości o 100%” gmina dostała petycję. Chodziło o dwa rowery.' } },
 
-  { tier: 3, kind: 'post', truth: 'prawda', reporter: 'Nauczycielka historii',
+  { tier: 3, type: 'real', kind: 'post', truth: 'prawda', reporter: 'Nauczycielka historii',
     post: { name: 'Wydawnictwo Szkolne Atlas', handle: '@WydawnictwoAtlas', time: '1 godz.',
       text: 'Przepraszamy za błąd w podręczniku do historii dla klasy 7 (s. 112, zła data bitwy). Poprawiona wersja jest już w e-booku, a szkoły dostaną naklejki z erratą.',
       shares: '2,1 tys.' },
@@ -472,6 +472,32 @@ function shuffle(list, rand) {
   return a;
 }
 
+// Wyzwanie dnia: ten sam zestaw dla wszystkich grających danego dnia. Ziarno to data w formacie
+// RRRR-MM-DD, a numer wyzwania liczy dni od pierwszego (DAILY_EPOCH = #1).
+const DAILY_EPOCH = '2026-10-03';
+
+function seededRandom(key) {
+  let h = 1779033703 ^ key.length;
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 3432918353), h = h << 13 | h >>> 19;
+  let a = h >>> 0;
+  // mulberry32
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = (t + Math.imul(t ^ t >>> 7, 61 | t)) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function dailyKey(date = new Date()) {
+  const p = n => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+
+function dailyNumber(key) {
+  return Math.round((Date.parse(key + 'T00:00:00Z') - Date.parse(DAILY_EPOCH + 'T00:00:00Z')) / 86400000) + 1;
+}
+
 // Zestaw na całą rozgrywkę: dzień 1 bierze zgłoszenia poziomu 1, a każdy kolejny co najmniej trzy
 // zgłoszenia wymagające nowego narzędzia i dwa ze starszych poziomów. Każdego dnia pojawia się
 // każdy werdykt, żeby gracz nie mógł wygrać, stawiając wszędzie tę samą pieczątkę.
@@ -494,5 +520,5 @@ function drawRun(rand = Math.random) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, SPREAD, localizedCase, evidenceOf, decisiveTools, hasFallout, reachAt, harmfulReach, drawRun };
+  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, SPREAD, localizedCase, evidenceOf, decisiveTools, hasFallout, reachAt, harmfulReach, drawRun, seededRandom, dailyKey, dailyNumber };
 }
