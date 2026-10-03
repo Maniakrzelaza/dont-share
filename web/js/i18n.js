@@ -57,6 +57,15 @@ const UI = {
     newTool: 'Nowe narzędzie',
     dayGo: 'Otwórz kolejkę',
 
+    pressTitle: 'Przegląd prasy',
+    pressEdition: date => `${date} · wydanie poranne`,
+    pressFinalDate: 'Czwartek, 8 października 2026',
+    pressOutlets: ['Gazeta Nadwiślańska', 'Echo Regionu', 'Radio Wschód', 'Łódź na Bieżąco'],
+    pressTag: { passed: 'Przeszło z naszą pieczątką', missed: 'Nikt tego nie sprawdził', rejected: 'Odrzuciliśmy prawdę' },
+    pressQuiet: 'Spokojny poranek. Żadna z wczorajszych spraw nie wróciła do nas rykoszetem.',
+    chiefNote: n => n === 0 ? 'Czysto. Ani jedna wczorajsza decyzja nie wróciła w prasie.' : n <= 2 ? 'Wczorajsze błędy już krążą po sieci. Dziś uważniej.' : 'Telefon dzwoni od rana. Jeszcze jeden taki dzień i rozmawiamy o twoim etacie.',
+    finalPressTitle: 'Ostatnie wydanie po twojej zmianie',
+
     brandDay: (n, date) => `Dzień ${n} · ${date}`,
     lblClock: 'Godzina', lblQueue: 'Kolejka', lblScore: 'Punkty', lblTrust: t => `Zaufanie ${t}%`,
     restart: 'Od nowa', restartConfirm: 'Na pewno?',
@@ -143,6 +152,15 @@ const UI = {
     dayGreet: 'Good morning. Your coffee is on the desk.',
     newTool: 'New tool',
     dayGo: 'Open the queue',
+
+    pressTitle: 'Morning papers',
+    pressEdition: date => `${date} · morning edition`,
+    pressFinalDate: 'Thursday, 8 October 2026',
+    pressOutlets: ['Gazeta Nadwiślańska', 'Echo Regionu', 'Radio Wschód', 'Łódź na Bieżąco'],
+    pressTag: { passed: 'Went out with our stamp', missed: 'Nobody checked it', rejected: 'We rejected the truth' },
+    pressQuiet: 'A quiet morning. None of yesterday’s cases came back to bite us.',
+    chiefNote: n => n === 0 ? 'Clean. Not one of yesterday’s calls came back in the papers.' : n <= 2 ? 'Yesterday’s mistakes are already doing the rounds. Be more careful today.' : 'The phone hasn’t stopped ringing. One more day like that and we talk about your job.',
+    finalPressTitle: 'The papers after your last shift',
 
     brandDay: (n, date) => `Day ${n} · ${date}`,
     lblClock: 'Time', lblQueue: 'Queue', lblScore: 'Score', lblTrust: t => `Trust ${t}%`,

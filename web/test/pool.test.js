@@ -3,7 +3,7 @@
 // Uruchamianie: node --test web/test/*.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, decisiveTools, drawRun } = require('../js/cases.js');
+const { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, decisiveTools, hasFallout, drawRun } = require('../js/cases.js');
 const { SCENES } = require('../js/scenes.js');
 
 test('every case is complete', () => {
@@ -13,6 +13,7 @@ test('every case is complete', () => {
     assert.ok([1, 2, 3].includes(c.tier), `${where}: unknown tier`);
     assert.ok(c.kind === 'post' ? c.post : c.article, `${where}: body missing for kind ${c.kind}`);
     assert.ok(c.lesson, `${where}: lesson missing`);
+    assert.ok(c.fallout && c.fallout.headline && c.fallout.body, `${where}: fallout missing`);
     Object.entries(c.ev).forEach(([k, [flag, text]]) => {
       assert.ok(TOOL_ORDER.includes(k), `${where}: unknown tool ${k}`);
       assert.ok(['ok', 'red', 'info'].includes(flag), `${where}: unknown flag ${flag}`);
@@ -56,4 +57,21 @@ test('every drawn run follows the rules', () => {
       VERDICTS.forEach(v => assert.ok(day.some(i => POOL[i].truth === v), `day ${d + 1} lacks ${v}`));
     });
   }
+});
+
+test('only consequential mistakes come back in the papers', () => {
+  const fake = { truth: 'falsz' }, twisted = { truth: 'manipulacja' }, real = { truth: 'prawda' };
+  // przepuszczone albo niesprawdzone fałszywki wracają
+  assert.equal(hasFallout(fake, 'prawda'), true);
+  assert.equal(hasFallout(twisted, 'prawda'), true);
+  assert.equal(hasFallout(fake, null), true);
+  // zatrzymane — nawet z pomylonym rodzajem — nie wracają
+  assert.equal(hasFallout(fake, 'falsz'), false);
+  assert.equal(hasFallout(fake, 'manipulacja'), false);
+  assert.equal(hasFallout(twisted, 'falsz'), false);
+  // odrzucona prawda wraca, niesprawdzona prawda nikomu nie szkodzi
+  assert.equal(hasFallout(real, 'falsz'), true);
+  assert.equal(hasFallout(real, 'manipulacja'), true);
+  assert.equal(hasFallout(real, 'prawda'), false);
+  assert.equal(hasFallout(real, null), false);
 });

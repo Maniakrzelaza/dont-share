@@ -82,12 +82,38 @@ function renderIntro() {
   document.getElementById('go').onclick = () => { S.screen = 'dayIntro'; render(); };
 }
 
+// Skutki decyzji z danego dnia: zgłoszenia, które wróciły w prasie (hasFallout).
+function falloutOf(day) {
+  return S.log.filter(x => x.day === day && hasFallout(POOL[x.id], x.verdict)).map(x => ({
+    c: localizedCase(x.id, LANG),
+    kind: x.verdict === null ? 'missed' : POOL[x.id].truth === 'prawda' ? 'rejected' : 'passed'
+  }));
+}
+
+function pressHTML(items, title, date) {
+  const t = T();
+  const clips = items.length
+    ? items.map((f, i) => `<article class="clip ${f.kind}">
+        <span class="src">${t.pressOutlets[i % t.pressOutlets.length]}</span>
+        <h3>${esc(f.c.fallout.headline)}</h3>
+        <p>${esc(f.c.fallout.body)}</p>
+        <span class="tag">${t.pressTag[f.kind]}</span>
+      </article>`).join('')
+    : `<p class="quiet">${t.pressQuiet}</p>`;
+  return `<section class="press" aria-label="${title}">
+    <div class="press-head"><b>${title}</b><span>${t.pressEdition(date)}</span></div>
+    ${clips}
+  </section>`;
+}
+
 function renderDayIntro() {
   const t = T(), d = DAYS[S.day], txt = t.days[S.day];
   const nt = d.newTool ? `<div class="newtool"><span class="t">${t.newTool}</span><b>${toolName(d.newTool)}</b>${t.tools[d.newTool].desc}.</div>` : '';
+  const fallout = S.day > 0 ? falloutOf(S.day - 1) : [];
   $app.innerHTML = memo(`
     <div class="hdr">${t.dayHdr(S.day + 1, DAYS.length, txt.date, dayCases().length, S.trust)}</div>
-    <h2>${S.day === 0 ? t.dayGreetFirst : t.dayGreet}</h2>
+    ${S.day > 0 ? pressHTML(fallout, t.pressTitle, txt.date) : ''}
+    <h2>${S.day === 0 ? t.dayGreetFirst : t.chiefNote(fallout.length)}</h2>
     <p>${txt.memo}</p>
     ${nt}
     <button class="go" id="go">${t.dayGo}</button>`);
@@ -207,7 +233,7 @@ function stamp(v) {
   S.score += pts;
   S.trust = Math.max(0, Math.min(100, S.trust + dTrust));
   S.last = { verdict: v, correct, pin: S.pin, pinGood, pts, dTrust };
-  S.log.push({ day: S.day, correct, missed: false, pinGood });
+  S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, correct, missed: false, pinGood });
   S.screen = 'feedback';
   render();
 }
@@ -246,9 +272,9 @@ function next() {
 }
 
 function endDay() {
-  const missed = S.screen === 'desk' ? dayCases().length - S.idx : 0;
-  for (let i = 0; i < missed; i++) S.log.push({ day: S.day, correct: false, missed: true, pinGood: false });
-  S.trust = Math.max(0, S.trust - missed * 10);
+  const missed = S.screen === 'desk' ? dayCases().slice(S.idx) : [];
+  missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, correct: false, missed: true, pinGood: false }));
+  S.trust = Math.max(0, S.trust - missed.length * 10);
   S.last = null;
   S.screen = S.trust <= 0 ? 'end' : 'dayEnd';
   render();
@@ -299,6 +325,7 @@ function renderEnd() {
       <div><div class="n">${st.missed}</div><div class="l">${t.eMissed}</div></div>
       <div><div class="n">${S.score}</div><div class="l">${t.eScore}</div></div>
     </div>
+    ${pressHTML(falloutOf(S.day), t.finalPressTitle, S.day + 1 < DAYS.length ? t.days[S.day + 1].date : t.pressFinalDate)}
     <h2>${t.cheatTitle}</h2>
     <ol class="cheat">${t.cheat.map(x => `<li>${x}</li>`).join('')}</ol>
     <button class="go" id="go">${t.btnAgain}</button>

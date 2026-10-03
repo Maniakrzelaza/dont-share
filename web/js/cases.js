@@ -4,7 +4,8 @@
 // potrzebne do jego rozstrzygnięcia: 1 — rejestr źródeł i archiwum dat, 2 — wyszukiwanie obrazem,
 // 3 — dokument źródłowy. Dowody (ev) mają flagę: 'ok' potwierdza prawdę, 'red' zdradza fałszywkę
 // lub manipulację, 'info' to tło bez rozstrzygnięcia. Flagi nie są pokazywane graczowi — służą do
-// oceny, czy wskazany przez niego kluczowy dowód rzeczywiście przesądzał.
+// oceny, czy wskazany przez niego kluczowy dowód rzeczywiście przesądzał. fallout to nagłówek z prasy
+// następnego dnia, gdy gracz przepuści fałszywkę albo odrzuci prawdę (patrz hasFallout).
 //
 // Treść zgłoszeń jest tu po polsku; angielska wersja tekstów jest w cases.en.js, a nazwy narzędzi,
 // werdyktów i dni — w i18n.js. Klucze (zrodlo, prawda…) są wspólne dla obu języków.
@@ -28,7 +29,9 @@ const POOL = [
       lead: 'Rząd po cichu przyjął rozporządzenie. Mandat wyniesie 5000 zł. Udostępnij, zanim to usuną!' },
     ev: { zrodlo: ['red', 'Domena gazeta-nadwislanska.info zarejestrowana 9 dni temu, właściciel ukryty. Prawdziwa Gazeta Nadwiślańska działa pod adresem gazetanadwislanska.pl od 1998 r. i nie opublikowała tego tekstu.'],
           data: ['info', 'Pierwsze wystąpienie: 4.10.2026, 23:58. Żaden dziennik urzędowy nie zawiera takiego rozporządzenia.'] },
-    lesson: 'Podrobiona domena. Czytaj adres litera po literze, bo fałszywe serwisy podszywają się pod znane tytuły. Apel „udostępnij, zanim usuną” to typowy wabik.' },
+    lesson: 'Podrobiona domena. Czytaj adres litera po literze, bo fałszywe serwisy podszywają się pod znane tytuły. Apel „udostępnij, zanim usuną” to typowy wabik.',
+    fallout: { headline: 'Panika w salonach samochodowych po fałszywym „zakazie aut”',
+      body: 'Tekst z podrobionej domeny udostępniono 200 tys. razy. Ministerstwo musiało wydać dementi.' } },
 
   { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Kierowca z Sieradza',
     article: { url: 'gazetanadwislanska.pl/region/most-lipowa-remont', outlet: 'Gazeta Nadwiślańska',
@@ -37,7 +40,9 @@ const POOL = [
       lead: 'Zarząd Dróg Miejskich zapowiada trzytygodniowy remont. Objazd poprowadzi ulicami Kościuszki i Polną, a autobusy linii 3 i 7 zmienią trasy.' },
     ev: { zrodlo: ['ok', 'Serwis działa od 1998 r., w stopce redaktor naczelny i adres redakcji. Autorka podpisuje teksty od 6 lat.'],
           data: ['ok', 'Opublikowano dziś, 7:40. Ten sam komunikat jest na stronie Zarządu Dróg Miejskich z datą 2.10.2026.'] },
-    lesson: 'Znane źródło, podpisana autorka, a informację potwierdza komunikat instytucji. Konkretne, nudne wiadomości zwykle są prawdziwe.' },
+    lesson: 'Znane źródło, podpisana autorka, a informację potwierdza komunikat instytucji. Konkretne, nudne wiadomości zwykle są prawdziwe.',
+    fallout: { headline: 'Kierowcy zaskoczeni zamknięciem mostu na Lipowej',
+      body: 'Oznaczyliśmy prawdziwy komunikat jako fałszywy. Rano na objeździe stanęły korki, a zarząd dróg pyta, czemu podważamy jego ogłoszenia.' } },
 
   { tier: 1, kind: 'post', truth: 'falsz', reporter: 'Zaniepokojony tata',
     post: { name: 'Zdrowie Bez Tajemnic', handle: '@zdrowie.bez.tajemnic', time: '3 godz.',
@@ -45,7 +50,9 @@ const POOL = [
       shares: '42 tys.' },
     ev: { zrodlo: ['red', 'Strona bez autora i danych kontaktowych. Link w opisie profilu prowadzi do sklepu z suplementami.'],
           data: ['info', 'Ten sam tekst krąży w sieci od 2017 r. w kilku językach, za każdym razem jako „nowe odkrycie”.'] },
-    lesson: 'Cudowne lekarstwo, wspólny wróg (koncerny, lekarze) i sklep w tle. Gdy ktoś zarabia na tym, w co uwierzysz, sprawdzaj podwójnie.' },
+    lesson: 'Cudowne lekarstwo, wspólny wróg (koncerny, lekarze) i sklep w tle. Gdy ktoś zarabia na tym, w co uwierzysz, sprawdzaj podwójnie.',
+    fallout: { headline: 'Lekarze: chorzy na grypę leczą się sodą zamiast iść do przychodni',
+      body: 'Przychodnie zgłaszają pacjentów, którzy uwierzyli w „cudowną kurację”. Sklep z suplementami podwoił sprzedaż.' } },
 
   { tier: 1, kind: 'post', truth: 'manipulacja', reporter: 'Studentka z Lublina',
     post: { name: 'Info Na Już', handle: '@InfoNaJuz', time: '25 min',
@@ -54,7 +61,9 @@ const POOL = [
       link: { outlet: 'Radio Wschód', title: 'Ulewa zalała centrum Zamościa. Woda na Rynku Wielkim po kolana', url: 'radiowschod.pl/wiadomosci/ulewa-zamosc' } },
     ev: { zrodlo: ['info', 'Radio Wschód to regionalna rozgłośnia działająca od 1994 r. Konto @InfoNaJuz głównie udostępnia cudze treści z własnym komentarzem.'],
           data: ['red', 'Artykuł w archiwum radia ma datę 14.07.2019. Dziś w Zamościu bezchmurnie, brak opadów.'] },
-    lesson: 'Prawdziwa informacja sprzed lat podana jako dzisiejsza. Sprawdzaj datę publikacji, a nie datę udostępnienia.' },
+    lesson: 'Prawdziwa informacja sprzed lat podana jako dzisiejsza. Sprawdzaj datę publikacji, a nie datę udostępnienia.',
+    fallout: { headline: 'Straż pożarna w Zamościu: dziesiątki zgłoszeń o powodzi, której nie ma',
+      body: 'Stary artykuł o ulewie z 2019 r. zablokował linię alarmową na pół dnia.' } },
 
   { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Uczeń z Sieradza',
     article: { url: 'mpk.sieradz.pl/aktualnosci/bilet-uczniowski', outlet: 'MPK Sieradz · komunikat',
@@ -63,7 +72,9 @@ const POOL = [
       lead: 'Rada Miasta przyjęła uchwałę o symbolicznej cenie biletu miesięcznego dla uczniów szkół podstawowych i średnich. Bilet będzie można kupić w aplikacji i w punktach obsługi.' },
     ev: { zrodlo: ['ok', 'Oficjalna strona miejskiego przewoźnika w domenie miasta. Te same dane kontaktowe od 2009 r.'],
           data: ['ok', 'Uchwała Rady Miasta z 24.09.2026 jest opublikowana w Biuletynie Informacji Publicznej.'] },
-    lesson: 'Dobra wiadomość nie musi być fałszywa. Oficjalne źródło i dokument w Biuletynie Informacji Publicznej rozwiewają wątpliwości.' },
+    lesson: 'Dobra wiadomość nie musi być fałszywa. Oficjalne źródło i dokument w Biuletynie Informacji Publicznej rozwiewają wątpliwości.',
+    fallout: { headline: 'Uczniowie przegapili zapisy na bilet za 1 zł',
+      body: 'Uznaliśmy komunikat przewoźnika za oszustwo. Rodzice piszą z pretensjami, a MPK prosi o sprostowanie.' } },
 
   { tier: 1, kind: 'post', truth: 'manipulacja', reporter: 'Mama dwójki uczniów',
     post: { name: 'Rodzice Mazowsza', handle: '@RodziceMazowsza', time: '50 min',
@@ -72,7 +83,9 @@ const POOL = [
       link: { outlet: 'Echo Regionu', title: 'Kuratorium: od jutra nauka zdalna we wszystkich szkołach w województwie', url: 'echoregionu.pl/edukacja/nauka-zdalna' } },
     ev: { zrodlo: ['info', 'Echo Regionu to portal działający od 2005 r. Grupa @RodziceMazowsza skupia 80 tys. osób i nie weryfikuje wpisów.'],
           data: ['red', 'Artykuł Echa Regionu ma datę 11.03.2020, z pierwszych dni pandemii. Kuratorium nie wydało dziś żadnego komunikatu.'] },
-    lesson: 'Stary artykuł o prawdziwym wydarzeniu wrócił jako dzisiejszy. Link wygląda wiarygodnie, ale data publikacji mówi wszystko.' },
+    lesson: 'Stary artykuł o prawdziwym wydarzeniu wrócił jako dzisiejszy. Link wygląda wiarygodnie, ale data publikacji mówi wszystko.',
+    fallout: { headline: 'Rodzice zostali w domu z dziećmi przez stary artykuł',
+      body: 'Tysiące uczniów nie przyszło do szkół po udostępnieniu tekstu sprzed sześciu lat. Kuratorium dementuje.' } },
 
   { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Wolontariuszka',
     article: { url: 'gazetanadwislanska.pl/region/bank-zywnosci-zbiorka', outlet: 'Gazeta Nadwiślańska',
@@ -81,7 +94,9 @@ const POOL = [
       lead: 'Wolontariusze w żółtych kamizelkach będą zbierać produkty z długim terminem ważności. Dary trafią do jadłodajni i domów samotnej matki.' },
     ev: { zrodlo: ['ok', 'Serwis działa od 1998 r. Autorka od 4 lat pisze o sprawach społecznych.'],
           data: ['ok', 'Opublikowano dziś. Ten sam termin i listę sklepów podaje strona organizatora zbiórki.'] },
-    lesson: 'Spokojny ton, konkretne miejsca i daty, potwierdzenie u organizatora. Tak wyglądają prawdziwe ogłoszenia.' },
+    lesson: 'Spokojny ton, konkretne miejsca i daty, potwierdzenie u organizatora. Tak wyglądają prawdziwe ogłoszenia.',
+    fallout: { headline: 'Zbiórka Banku Żywności zebrała połowę zakładanych darów',
+      body: 'Nasza pieczątka „fałsz” krążyła w sieci. Część darczyńców uznała zbiórkę za oszustwo.' } },
 
   { tier: 1, kind: 'post', truth: 'falsz', reporter: 'Senior z Radomia',
     post: { name: 'Dodatek Energetyczny 2026', handle: '@dodatek.energetyczny.gov', time: '4 godz.',
@@ -89,7 +104,9 @@ const POOL = [
       shares: '12 tys.' },
     ev: { zrodlo: ['red', 'Domena dodatek-energia-gov.pl.com zarejestrowana 2 dni temu za granicą. Końcówka .pl.com nie ma nic wspólnego z rządowymi stronami, a profil mimo „gov” w nazwie nie jest oficjalny.'],
           data: ['info', 'Wpis z dziś. Podobne „dodatki” pojawiały się już w 2022 i 2024 r., zawsze z linkiem do innej domeny.'] },
-    lesson: 'Phishing w przebraniu urzędu. Żadna instytucja nie prosi o login do banku przez formularz z posta. Sprawdź końcówkę adresu: .pl.com to nie .gov.pl.' },
+    lesson: 'Phishing w przebraniu urzędu. Żadna instytucja nie prosi o login do banku przez formularz z posta. Sprawdź końcówkę adresu: .pl.com to nie .gov.pl.',
+    fallout: { headline: 'Seniorzy stracili oszczędności przez fałszywy „dodatek energetyczny”',
+      body: 'Policja przyjęła 40 zgłoszeń wyłudzeń. Poszkodowani mówią, że nikt nie ostrzegł ich przed formularzem.' } },
 
   { tier: 1, kind: 'article', truth: 'falsz', reporter: 'Fanka seriali',
     article: { url: 'plotki-teraz24.xyz/gwiazdy/nie-zyje-aktor', outlet: 'Plotki Teraz 24',
@@ -98,7 +115,9 @@ const POOL = [
       lead: 'Smutne wieści obiegły kraj. Rodzina prosi o uszanowanie prywatności. Szczegóły w galerii poniżej.' },
     ev: { zrodlo: ['red', 'Serwis założony miesiąc temu, bez stopki redakcyjnej. Na stronie 14 reklam i pięć przekierowań.'],
           data: ['red', 'Godzinę temu aktor opublikował na swoim profilu zdjęcie z planu z podpisem „Żyję i mam się dobrze, znowu”.'] },
-    lesson: 'Fałszywa wiadomość o śmierci to klasyczna przynęta na kliknięcia. Zanim złożysz kondolencje, sprawdź oficjalne konta tej osoby i znane media.' },
+    lesson: 'Fałszywa wiadomość o śmierci to klasyczna przynęta na kliknięcia. Zanim złożysz kondolencje, sprawdź oficjalne konta tej osoby i znane media.',
+    fallout: { headline: 'Jan Wiatrowski: „Uśmierciliście mnie po raz trzeci”',
+      body: 'Aktor nagrał ironiczne wideo o fałszywym nekrologu. W komentarzach pytania, czemu nikt tego nie sprawdził.' } },
 
   { tier: 1, kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec osiedla Słonecznego',
     article: { url: 'siec-centrum.pl/komunikaty/wylaczenia-pradu', outlet: 'Sieć Energetyczna Centrum · komunikat',
@@ -107,7 +126,9 @@ const POOL = [
       lead: 'Powodem są prace modernizacyjne na stacji transformatorowej przy ul. Akacjowej. Prosimy o wcześniejsze naładowanie urządzeń.' },
     ev: { zrodlo: ['ok', 'Oficjalna strona operatora sieci. Ten sam adres i numer infolinii od 2011 r.'],
           data: ['ok', 'Opublikowano dziś, z wyprzedzeniem wymaganym przepisami. Komunikat powtarza też lokalna gazeta.'] },
-    lesson: 'Suchy komunikat z oficjalnej strony, z konkretną datą, godziną i powodem. Nic tu nie gra na emocjach.' },
+    lesson: 'Suchy komunikat z oficjalnej strony, z konkretną datą, godziną i powodem. Nic tu nie gra na emocjach.',
+    fallout: { headline: 'Osiedle Słoneczne bez prądu i bez ostrzeżenia',
+      body: 'Uznaliśmy komunikat operatora za fałszywkę. Mieszkańcy nie przygotowali się na wyłączenie, a lodówki stały ciepłe sześć godzin.' } },
 
   // ---------- poziom 2: zdjęcia ----------
   { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Emerytka z Kielc',
@@ -118,7 +139,9 @@ const POOL = [
     ev: { zrodlo: ['info', 'Konto założone w 2023 r. Publikuje głównie alarmujące wpisy o cenach paliw.'],
           data: ['info', 'Wpis z dziś, 8:15. Stacje w okolicy nie zgłaszają braków.'],
           obraz: ['red', 'Zdjęcie po raz pierwszy opublikował zagraniczny serwis informacyjny 3.03.2022. Przedstawia stację w innym kraju — ceny na pylonie są w obcej walucie.'] },
-    lesson: 'Prawdziwe zdjęcie w fałszywym kontekście. Wyszukiwanie obrazem w kilka sekund pokazuje, skąd fotografia pochodzi. Wezwanie do paniki („tankujcie!”) to sygnał ostrzegawczy.' },
+    lesson: 'Prawdziwe zdjęcie w fałszywym kontekście. Wyszukiwanie obrazem w kilka sekund pokazuje, skąd fotografia pochodzi. Wezwanie do paniki („tankujcie!”) to sygnał ostrzegawczy.',
+    fallout: { headline: 'Kolejki na stacjach po fałszywym zdjęciu',
+      body: 'Kierowcy tankowali na zapas po wpisie ze zdjęciem z 2022 r. Na dwóch stacjach w Kielcach naprawdę zabrakło paliwa.' } },
 
   { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Mama z Krakowa',
     post: { name: 'Kraków News 24', handle: '@KrakowNews_24', time: '40 min',
@@ -128,7 +151,9 @@ const POOL = [
     ev: { zrodlo: ['red', 'Konto założone 3 tygodnie temu, mimo nazwy nie należy do żadnej redakcji. 40 tys. obserwujących przybyło w jednym tygodniu.'],
           data: ['info', 'Wpis z dziś, 10:20. Straż miejska nie wydała żadnego komunikatu.'],
           obraz: ['red', 'Brak wcześniejszych wystąpień zdjęcia. Analiza wskazuje obraz wygenerowany przez AI: łańcuch huśtawki wrasta w drzewo, a wilk w odbiciu w kałuży ma pięć łap.'] },
-    lesson: 'Obraz wygenerowany przez AI. Szukaj błędów w szczegółach (dłonie, napisy, odbicia) i sprawdź, czy ktokolwiek inny potwierdza zdarzenie.' },
+    lesson: 'Obraz wygenerowany przez AI. Szukaj błędów w szczegółach (dłonie, napisy, odbicia) i sprawdź, czy ktokolwiek inny potwierdza zdarzenie.',
+    fallout: { headline: 'Szkoły przy Plantach zamknęły place zabaw przez wilka z AI',
+      body: 'Straż miejska przeszukała park. Wilka nie było, był tylko obraz z generatora.' } },
 
   { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Kierowca autobusu',
     article: { url: 'lublinteraz.pl/miasto/autobusy-elektryczne', outlet: 'Lublin Teraz',
@@ -139,7 +164,9 @@ const POOL = [
     ev: { zrodlo: ['ok', 'Lokalny portal działający od 2011 r., redakcja i autorzy podani w stopce.'],
           data: ['ok', 'Opublikowano dziś, 10:02.'],
           obraz: ['ok', 'Zdjęcie pojawiło się dziś rano na stronie miejskiego przewoźnika, podpisane nazwiskiem fotografa.'] },
-    lesson: 'Wszystko się zgadza: lokalne źródło, aktualna data i zdjęcie z oficjalnej strony przewoźnika.' },
+    lesson: 'Wszystko się zgadza: lokalne źródło, aktualna data i zdjęcie z oficjalnej strony przewoźnika.',
+    fallout: { headline: 'Przewoźnik z Lublina: nasze autobusy istnieją',
+      body: 'Nazwaliśmy prawdziwe zdjęcie fałszywym. Przewoźnik opublikował wideo z zajezdni i prosi o sprostowanie.' } },
 
   { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Nauczyciel WOS-u',
     post: { name: 'Marek Patriota', handle: '@Marek.Patriota', time: '2 godz.',
@@ -150,7 +177,9 @@ const POOL = [
     ev: { zrodlo: ['red', 'Szyderca.pl to serwis satyryczny. W stopce: „Wszystkie teksty są fikcją i żartem”.'],
           data: ['red', 'Tekst opublikowano 1.04.2026.'],
           obraz: ['info', 'Zdjęcie z sali obrad z 2024 r., użyte jako ilustracja.'] },
-    lesson: 'Satyra wzięta na serio. Zanim się oburzysz, sprawdź, czym jest strona źródłowa i czy tekst nie pochodzi z 1 kwietnia.' },
+    lesson: 'Satyra wzięta na serio. Zanim się oburzysz, sprawdź, czym jest strona źródłowa i czy tekst nie pochodzi z 1 kwietnia.',
+    fallout: { headline: 'Szyderca.pl dziękuje za reklamę',
+      body: 'Serwis satyryczny chwali się rekordem odsłon, odkąd tekst o „likwidacji poniedziałków” uznano za prawdziwy.' } },
 
   { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Mieszkaniec Widzewa',
     article: { url: 'lodznabiezaco.pl/wydarzenia/pozar-hali-widzew', outlet: 'Łódź na Bieżąco',
@@ -161,7 +190,9 @@ const POOL = [
     ev: { zrodlo: ['ok', 'Portal działa od 2014 r. Autorka od lat relacjonuje wydarzenia z regionu.'],
           data: ['ok', 'Opublikowano dziś o 6:50, aktualizowano o 9:10.'],
           obraz: ['ok', 'Zdjęcie udostępniła dziś o 6:30 lokalna jednostka straży pożarnej na swoim profilu.'] },
-    lesson: 'Szybka, ale rzetelna relacja: aktualizowany tekst, oficjalne zdjęcie służb i podpisana autorka.' },
+    lesson: 'Szybka, ale rzetelna relacja: aktualizowany tekst, oficjalne zdjęcie służb i podpisana autorka.',
+    fallout: { headline: 'Mieszkańcy Widzewa nie zamknęli okien',
+      body: 'Ostrzeżenie o dymie uznaliśmy za fałszywe. Dwie osoby trafiły do szpitala z podrażnieniem dróg oddechowych.' } },
 
   { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Student z Wrocławia',
     post: { name: 'Głos Ludu', handle: '@GlosLudu_PL', time: '3 godz.',
@@ -171,7 +202,9 @@ const POOL = [
     ev: { zrodlo: ['info', 'Konto istnieje od 2020 r. i publikuje treści polityczne z różnych źródeł.'],
           data: ['info', 'Wczoraj w Warszawie rzeczywiście odbyła się zgłoszona demonstracja. Policja szacuje udział na 3 tys. osób.'],
           obraz: ['red', 'Zdjęcie pochodzi z finału festiwalu muzycznego w innym mieście, opublikowane 28.06.2019 przez agencję fotograficzną.'] },
-    lesson: 'Prawdziwe wydarzenie, cudze zdjęcie. Fotografia z innego miejsca i czasu ma pokazać skalę, której nie było.' },
+    lesson: 'Prawdziwe wydarzenie, cudze zdjęcie. Fotografia z innego miejsca i czasu ma pokazać skalę, której nie było.',
+    fallout: { headline: 'Spór o liczby po fałszywym zdjęciu tłumu',
+      body: 'Zdjęcie z festiwalu krążyło jako dowód „pół miliona ludzi”. Zaufanie do relacji z demonstracji spadło po obu stronach.' } },
 
   { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Wędkarz spod Płocka',
     post: { name: 'Mazowsze Alarm', handle: '@MazowszeAlarm', time: '1 godz.',
@@ -181,7 +214,9 @@ const POOL = [
     ev: { zrodlo: ['red', 'Konto założone tydzień temu. Wszystkie wpisy to sensacje bez źródeł.'],
           data: ['info', 'Wpis z dziś. Żadne służby ani lokalne media nie zgłaszają zdarzenia.'],
           obraz: ['red', 'Fotomontaż: płetwa pochodzi ze zdjęcia z Australii z 2015 r., most z bazy zdjęć Płocka. Cień płetwy pada w inną stronę niż cienie filarów mostu.'] },
-    lesson: 'Fotomontaż. Wyszukiwanie obrazem znajduje oba źródła, a uważne oko widzi cienie padające w różne strony.' },
+    lesson: 'Fotomontaż. Wyszukiwanie obrazem znajduje oba źródła, a uważne oko widzi cienie padające w różne strony.',
+    fallout: { headline: 'Wędkarze omijają Wisłę przez fotomontaż rekina',
+      body: 'Ośrodek sportów wodnych w Płocku odwołał zajęcia. Biolodzy przypominają, że rekiny nie żyją w słodkiej wodzie.' } },
 
   { tier: 2, kind: 'article', truth: 'prawda', reporter: 'Turystka z Gdańska',
     article: { url: 'tatrytu.pl/pogoda/pierwszy-snieg', outlet: 'Tatry Tu',
@@ -192,7 +227,9 @@ const POOL = [
     ev: { zrodlo: ['ok', 'Regionalny portal działający od 2009 r., autor podpisany.'],
           data: ['ok', 'Opublikowano dziś, 7:45. Stacja meteo na Kasprowym notuje −3°C i opad śniegu.'],
           obraz: ['ok', 'Zdjęcie to kadr z dzisiejszego zapisu publicznej kamery internetowej w Zakopanem, godzina 7:12.'] },
-    lesson: 'Śnieg w październiku brzmi dziwnie, ale w Tatrach to norma. Nietypowe nie znaczy fałszywe: dane pogodowe i kamera potwierdzają.' },
+    lesson: 'Śnieg w październiku brzmi dziwnie, ale w Tatrach to norma. Nietypowe nie znaczy fałszywe: dane pogodowe i kamera potwierdzają.',
+    fallout: { headline: 'Turyści ruszyli w Tatry w trampkach',
+      body: 'Uznaliśmy informację o śniegu za fałsz. Ratownicy sprowadzili ze szlaków kilkanaście osób bez zimowego sprzętu.' } },
 
   { tier: 2, kind: 'post', truth: 'manipulacja', reporter: 'Radna osiedla',
     post: { name: 'Kraków Bez Ściemy', handle: '@KrakowBezSciemy', time: '2 godz.',
@@ -202,7 +239,9 @@ const POOL = [
     ev: { zrodlo: ['info', 'Konto lokalnych aktywistów, działa od 2021 r., często krytykuje władze miasta.'],
           data: ['info', 'Festiwal w parku rzeczywiście odbył się wczoraj. Służby porządkowe sprzątały teren do północy.'],
           obraz: ['red', 'Zdjęcie opublikował serwis z innego miasta 12.08.2021, po nielegalnej imprezie. Nie przedstawia tego parku.'] },
-    lesson: 'Prawdziwe wydarzenie, ale zdjęcie z innej sytuacji. Nawet słuszna krytyka traci wiarygodność, gdy podpiera ją cudzą fotografią.' },
+    lesson: 'Prawdziwe wydarzenie, ale zdjęcie z innej sytuacji. Nawet słuszna krytyka traci wiarygodność, gdy podpiera ją cudzą fotografią.',
+    fallout: { headline: 'Organizatorzy festiwalu żądają przeprosin',
+      body: 'Zdjęcie śmieci z innego miasta przypięto do miejskiego festiwalu. Sprzątający pokazali zdjęcia czystego parku z rana.' } },
 
   { tier: 2, kind: 'post', truth: 'falsz', reporter: 'Kierowca taksówki',
     post: { name: 'Ostatnia Chwila', handle: '@ostatnia_chwila_pl', time: '35 min',
@@ -212,7 +251,9 @@ const POOL = [
     ev: { zrodlo: ['red', 'Konto anonimowe, założone w tym miesiącu.'],
           data: ['info', 'Żadna stacja nie nadała dziś takiej informacji; nie ma jej w archiwach programów.'],
           obraz: ['red', 'Zrzutu nie ma w żadnym archiwum telewizji. Identyczny układ paska oferuje darmowy generator „fałszywych wiadomości” do memów.'] },
-    lesson: 'Spreparowany zrzut ekranu. Pasek z napisem PILNE da się zrobić w minutę w generatorze memów. Szukaj materiału na stronie samej stacji.' },
+    lesson: 'Spreparowany zrzut ekranu. Pasek z napisem PILNE da się zrobić w minutę w generatorze memów. Szukaj materiału na stronie samej stacji.',
+    fallout: { headline: 'Sklepy oblężone przed „godziną policyjną”',
+      body: 'Spreparowany zrzut paska z telewizji wywołał zakupy na zapas. Stacja zapowiada pozew przeciw autorom fałszywki.' } },
 
   // ---------- poziom 3: dokumenty ----------
   { tier: 3, kind: 'post', truth: 'manipulacja', reporter: 'Pielęgniarka z Gdańska',
@@ -224,7 +265,9 @@ const POOL = [
           data: ['info', 'Grafika z dziś. Wywiad, z którego pochodzi cytat, odbył się 2.10.2026 w radiu.'],
           obraz: ['info', 'Zdjęcie ministra pochodzi z oficjalnej galerii resortu.'],
           dokument: ['red', 'Pełny zapis wywiadu: „Mówienie, że szczepienia dzieci nie mają sensu, to szkodliwy mit, z którym walczymy”.'] },
-    lesson: 'Cytat wyrwany z kontekstu: zdanie ucięto tak, by znaczyło odwrotnie. Grafika z cytatem to nie źródło. Szukaj pełnej wypowiedzi.' },
+    lesson: 'Cytat wyrwany z kontekstu: zdanie ucięto tak, by znaczyło odwrotnie. Grafika z cytatem to nie źródło. Szukaj pełnej wypowiedzi.',
+    fallout: { headline: 'Mniej zapisów na szczepienia dzieci',
+      body: 'Ucięty cytat ministra krążył jako „przyznanie się”. Przychodnie notują odwołane wizyty.' } },
 
   { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Kawiarz z Poznania',
     article: { url: 'zdrowiedzis.pl/nauka/kawa-zawal', outlet: 'Zdrowie Dziś',
@@ -236,7 +279,9 @@ const POOL = [
           data: ['info', 'Badanie opublikowano w czasopiśmie naukowym tydzień temu.'],
           obraz: ['info', 'Zdjęcie z banku zdjęć.'],
           dokument: ['red', 'Badanie przeprowadzono na 24 myszach, którym podawano kofeinę w dawce odpowiadającej około 60 filiżankom dziennie u człowieka. Autorzy piszą: „wyników nie należy przenosić na ludzi”.'] },
-    lesson: 'Nagłówek przekręca prawdziwe badanie. Kogo badano, ile było osób, jaka dawka? Odpowiedzi są w pracy źródłowej, nie w tytule.' },
+    lesson: 'Nagłówek przekręca prawdziwe badanie. Kogo badano, ile było osób, jaka dawka? Odpowiedzi są w pracy źródłowej, nie w tytule.',
+    fallout: { headline: 'Kawiarnie: klienci pytają, czy kawa ich zabije',
+      body: 'Tekst o badaniu na myszach udostępniono 90 tys. razy. Kardiolodzy tłumaczą w telewizji, że nie ma powodów do paniki.' } },
 
   { tier: 3, kind: 'article', truth: 'prawda', reporter: 'Rolnik spod Płocka',
     article: { url: 'gazetanadwislanska.pl/kraj/wrzesien-rekord-temperatury', outlet: 'Gazeta Nadwiślańska',
@@ -248,7 +293,9 @@ const POOL = [
           data: ['ok', 'Opublikowano dziś, 11:15.'],
           obraz: ['ok', 'Wykres pochodzi z miesięcznego raportu państwowej służby meteorologicznej.'],
           dokument: ['ok', 'Raport miesięczny: średnia temperatura września 17,9°C, najwyższa od 1951 r. Liczby w artykule zgadzają się z raportem.'] },
-    lesson: 'Liczby w tekście zgadzają się z dokumentem źródłowym. Tak wygląda rzetelne dziennikarstwo.' },
+    lesson: 'Liczby w tekście zgadzają się z dokumentem źródłowym. Tak wygląda rzetelne dziennikarstwo.',
+    fallout: { headline: 'Służba meteorologiczna prostuje nasze „sprostowanie”',
+      body: 'Oznaczyliśmy dane o rekordowym wrześniu jako nieprawdziwe. Nasza pieczątka trafiła na profile, które zaprzeczają zmianom klimatu.' } },
 
   { tier: 3, kind: 'post', truth: 'falsz', reporter: 'Fan gier, 13 lat',
     post: { name: 'Kuba Gra', handle: '@kubagra_offical', time: '12 min',
@@ -259,7 +306,9 @@ const POOL = [
           data: ['info', 'Wpis z dziś. Identyczne „rozdania” pojawiły się w tym miesiącu w imieniu czterech innych twórców.'],
           obraz: ['info', 'Zdjęcie telefonów pochodzi z banku zdjęć.'],
           dokument: ['red', 'Na prawdziwym kanale twórcy nie ma żadnej informacji o konkursie. Formularz zbiera dane kart płatniczych.'] },
-    lesson: 'Oszustwo phishingowe. Literówka w nazwie konta, presja czasu i prośba o dane karty to trzy czerwone flagi naraz.' },
+    lesson: 'Oszustwo phishingowe. Literówka w nazwie konta, presja czasu i prośba o dane karty to trzy czerwone flagi naraz.',
+    fallout: { headline: 'Dzieci podały dane kart rodziców w fałszywym konkursie',
+      body: 'Bank blokuje setki kart po „rozdaniu smartfonów”. Prawdziwy Kuba Gra ostrzega widzów na swoim kanale.' } },
 
   { tier: 3, kind: 'article', truth: 'falsz', reporter: 'Dyrektorka szkoły',
     article: { url: 'gco-news.pl/edukacja/raport-czytanie', outlet: 'Gazeta Codzienna Online',
@@ -269,7 +318,9 @@ const POOL = [
     ev: { zrodlo: ['red', 'Serwis działa od roku, w stopce brak nazwisk redakcji.'],
           data: ['info', 'Tekst z dziś, w ciągu godziny przedrukowało go kilkanaście stron.'],
           dokument: ['red', 'Instytut nie publikował takiego raportu. W jego ostatnim badaniu odsetek uczniów z poważnymi trudnościami w czytaniu wyniósł 17%.'] },
-    lesson: 'Zmyślona liczba podpięta pod poważnie brzmiącą instytucję. Jeśli tekst nie linkuje raportu, znajdź go sam.' },
+    lesson: 'Zmyślona liczba podpięta pod poważnie brzmiącą instytucję. Jeśli tekst nie linkuje raportu, znajdź go sam.',
+    fallout: { headline: 'Instytut: nie publikowaliśmy raportu o 70%',
+      body: 'Zmyślona liczba trafiła do debaty w radzie miasta. Instytut zapowiada skargę.' } },
 
   { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Rodzic nastolatka',
     article: { url: 'gamingnews.pl/nauka/gry-iq', outlet: 'Gaming News',
@@ -281,7 +332,9 @@ const POOL = [
           data: ['info', 'Badanie opublikowano 3 dni temu w czasopiśmie naukowym.'],
           obraz: ['info', 'Zdjęcie z banku zdjęć.'],
           dokument: ['red', 'Badanie objęło 40 dorosłych. Po 6 tygodniach grania wynik w jednym teście pamięci roboczej poprawił się o 4%. O IQ nie ma w pracy ani słowa.'] },
-    lesson: 'Mały efekt z jednego testu urósł w nagłówku do „20 punktów IQ”. Porównaj liczby z tytułu z liczbami z badania.' },
+    lesson: 'Mały efekt z jednego testu urósł w nagłówku do „20 punktów IQ”. Porównaj liczby z tytułu z liczbami z badania.',
+    fallout: { headline: 'Rodzice kupują gry „na inteligencję”',
+      body: 'Nagłówek o 20 punktach IQ trafił do reklam sklepów z grami. Autorzy badania prostują w mediach.' } },
 
   { tier: 3, kind: 'article', truth: 'prawda', reporter: 'Pedagożka szkolna',
     article: { url: 'gazetanadwislanska.pl/kraj/raport-hejt-uczniowie', outlet: 'Gazeta Nadwiślańska',
@@ -291,7 +344,9 @@ const POOL = [
     ev: { zrodlo: ['ok', 'Serwis działa od 1998 r., autorka specjalizuje się w edukacji.'],
           data: ['ok', 'Opublikowano dziś, dzień po premierze raportu.'],
           dokument: ['ok', 'Raport rzecznika praw uczniowskich, s. 14: 34% badanych doświadczyło hejtu w ciągu roku. Próba i metoda opisane w aneksie.'] },
-    lesson: 'Liczby z artykułu zgadzają się z raportem, a raport opisuje swoją metodę. Tak wygląda rzetelne powołanie się na badanie.' },
+    lesson: 'Liczby z artykułu zgadzają się z raportem, a raport opisuje swoją metodę. Tak wygląda rzetelne powołanie się na badanie.',
+    fallout: { headline: 'Rzecznik praw uczniowskich: podważanie raportu szkodzi ofiarom hejtu',
+      body: 'Uznaliśmy rzetelny raport za niewiarygodny. Szkoły wstrzymały program przeciw hejtowi „do wyjaśnienia sprawy”.' } },
 
   { tier: 3, kind: 'post', truth: 'falsz', reporter: 'Licealista',
     post: { name: 'Mądre Cytaty', handle: '@madre.cytaty', time: '5 godz.',
@@ -302,7 +357,9 @@ const POOL = [
           data: ['info', 'Grafika krąży od 2019 r., wcześniej podpisana innym nazwiskiem.'],
           obraz: ['red', 'Portret to zdjęcie stockowe modela, opisane w banku zdjęć jako „starszy mężczyzna w okularach”.'],
           dokument: ['red', 'W wykazie laureatów Nagrody Nobla nie ma nikogo o tym nazwisku. Cytat nie występuje w żadnej książce ani wywiadzie.'] },
-    lesson: 'Zmyślony autorytet. Poważnie brzmiący tytuł i portret mają uwiarygodnić cytat. Sprawdź, czy ta osoba w ogóle istnieje.' },
+    lesson: 'Zmyślony autorytet. Poważnie brzmiący tytuł i portret mają uwiarygodnić cytat. Sprawdź, czy ta osoba w ogóle istnieje.',
+    fallout: { headline: 'Nieistniejący noblista cytowany na sesji rady miasta',
+      body: 'Cytat „prof. Halickiego” padł w przemówieniu radnego. Nagranie stało się memem.' } },
 
   { tier: 3, kind: 'article', truth: 'manipulacja', reporter: 'Mieszkanka Zielonej Doliny',
     article: { url: 'gmina-info24.pl/bezpieczenstwo/przestepczosc', outlet: 'Gmina Info 24',
@@ -314,7 +371,9 @@ const POOL = [
           data: ['info', 'Dane policji za trzeci kwartał opublikowano wczoraj.'],
           obraz: ['info', 'Zdjęcie z banku zdjęć, nie z tej gminy.'],
           dokument: ['red', 'Raport policji: w trzecim kwartale zgłoszono 4 kradzieże rowerów wobec 2 rok wcześniej. Innych przestępstw nie odnotowano. Gmina ma 900 mieszkańców.'] },
-    lesson: 'Procenty z małych liczb straszą najbardziej. Wzrost „o 100%” to tu dwa rowery więcej. Zawsze pytaj: 100% z ilu?' },
+    lesson: 'Procenty z małych liczb straszą najbardziej. Wzrost „o 100%” to tu dwa rowery więcej. Zawsze pytaj: 100% z ilu?',
+    fallout: { headline: 'Mieszkańcy Zielonej Doliny chcą prywatnej ochrony',
+      body: 'Po tekście o „wzroście przestępczości o 100%” gmina dostała petycję. Chodziło o dwa rowery.' } },
 
   { tier: 3, kind: 'post', truth: 'prawda', reporter: 'Nauczycielka historii',
     post: { name: 'Wydawnictwo Szkolne Atlas', handle: '@WydawnictwoAtlas', time: '1 godz.',
@@ -323,7 +382,9 @@ const POOL = [
     ev: { zrodlo: ['ok', 'Oficjalny, zweryfikowany profil wydawnictwa, działa od 2012 r.'],
           data: ['info', 'Wpis z dziś.'],
           dokument: ['ok', 'Errata na stronie wydawnictwa potwierdza błąd i podaje poprawną datę. Ten sam komunikat dostały szkoły.'] },
-    lesson: 'Sprostowanie to znak rzetelności, nie słabości. Źródło przyznało się do błędu i pokazało, jak go poprawia.' }
+    lesson: 'Sprostowanie to znak rzetelności, nie słabości. Źródło przyznało się do błędu i pokazało, jak go poprawia.',
+    fallout: { headline: 'Wydawnictwo pyta, czemu jego przeprosiny to „fałsz”',
+      body: 'Oznaczyliśmy sprostowanie jako nieprawdziwe. Nauczyciele nie dowiedzieli się o błędzie w podręczniku.' } }
 ];
 
 const FALLBACK_EVIDENCE = {
@@ -361,6 +422,15 @@ function evidenceOf(c, tool, lang = 'pl') {
   if (tool === 'obraz' && !c.photo) return ['info', f.noPhoto];
   if (tool === 'dokument') return ['info', f.noDocument];
   return ['info', f.nothing];
+}
+
+// Czy decyzja gracza wraca następnego dnia w prasie (fallout zgłoszenia). verdict === null znaczy,
+// że zgłoszenie zostało niesprawdzone. Fałszywka lub manipulacja wraca, gdy przeszła jako prawda
+// albo nikt jej nie zatrzymał; prawda — gdy została odrzucona. Pomylenie fałszu z manipulacją nie
+// ma skutków: fałszywka i tak nie poszła w świat.
+function hasFallout(c, verdict) {
+  if (c.truth === 'prawda') return verdict !== null && verdict !== 'prawda';
+  return verdict === null || verdict === 'prawda';
 }
 
 // Narzędzia, których wynik przesądza o werdykcie: potwierdzenie przy prawdzie, sygnał
@@ -401,5 +471,5 @@ function drawRun(rand = Math.random) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, localizedCase, evidenceOf, decisiveTools, drawRun };
+  module.exports = { TOOL_ORDER, VERDICTS, DAYS, POOL, CASES_PER_DAY, localizedCase, evidenceOf, decisiveTools, hasFallout, drawRun };
 }

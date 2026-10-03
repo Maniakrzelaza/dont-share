@@ -11,7 +11,9 @@ const POOL_EN = [
       lead: 'The government quietly passed the regulation. The fine will be 5,000 zł. Share before they delete it!' },
     ev: { zrodlo: 'The domain gazeta-nadwislanska.info was registered 9 days ago by a hidden owner. The real Gazeta Nadwiślańska has run at gazetanadwislanska.pl since 1998 and never published this story.',
           data: 'First seen 4 Oct 2026, 23:58. No official journal contains any such regulation.' },
-    lesson: 'A spoofed domain. Read the address letter by letter: fake sites pose as well-known titles. “Share before they delete it” is a classic hook.' },
+    lesson: 'A spoofed domain. Read the address letter by letter: fake sites pose as well-known titles. “Share before they delete it” is a classic hook.',
+    fallout: { headline: 'Panic at car dealers over fake ‘car ban’',
+      body: 'A story from a spoofed domain was shared 200,000 times. The ministry had to issue a denial.' } },
 
   { reporter: 'A driver from Sieradz',
     article: { headline: 'Lipowa Street bridge in Sieradz closed from 14 October',
@@ -19,7 +21,9 @@ const POOL_EN = [
       lead: 'The city roads authority announces a three-week repair. The detour will run along Kościuszki and Polna streets, and bus lines 3 and 7 will change routes.' },
     ev: { zrodlo: 'The site has run since 1998, with the editor-in-chief and newsroom address in the footer. The author has had a byline here for 6 years.',
           data: 'Published today, 7:40. The same notice is on the city roads authority’s website, dated 2 Oct 2026.' },
-    lesson: 'A known source, a named author, and the institution itself confirms it. Specific, boring news is usually true.' },
+    lesson: 'A known source, a named author, and the institution itself confirms it. Specific, boring news is usually true.',
+    fallout: { headline: 'Drivers caught out by Lipowa bridge closure',
+      body: 'We marked a real notice as fake. This morning the detour jammed, and the roads authority asks why we undermine its announcements.' } },
 
   { reporter: 'A worried dad',
     post: { name: 'Health Without Secrets', time: '3 h',
@@ -27,7 +31,9 @@ const POOL_EN = [
       shares: '42K' },
     ev: { zrodlo: 'A page with no author and no contact details. The link in its profile leads to a supplement shop.',
           data: 'The same text has circulated since 2017 in several languages, each time as a “new discovery”.' },
-    lesson: 'A miracle cure, a common enemy (Big Pharma, doctors) and a shop in the background. When someone profits from what you believe, check twice.' },
+    lesson: 'A miracle cure, a common enemy (Big Pharma, doctors) and a shop in the background. When someone profits from what you believe, check twice.',
+    fallout: { headline: 'Doctors: flu patients treating themselves with baking soda',
+      body: 'Clinics report patients who believed the ‘miracle cure’. The supplement shop doubled its sales.' } },
 
   { reporter: 'A student from Lublin',
     post: { name: 'News Right Now', time: '25 min',
@@ -36,7 +42,9 @@ const POOL_EN = [
       link: { title: 'Downpour floods central Zamość. Knee-deep water on the Great Market Square' } },
     ev: { zrodlo: 'Radio Wschód is a regional station on air since 1994. The @InfoNaJuz account mostly reshares other people’s content with its own comment.',
           data: 'The article in the station’s archive is dated 14 Jul 2019. Today Zamość has clear skies and no rain.' },
-    lesson: 'Real news from years ago passed off as today’s. Check the publication date, not the date it was shared.' },
+    lesson: 'Real news from years ago passed off as today’s. Check the publication date, not the date it was shared.',
+    fallout: { headline: 'Zamość fire service swamped with calls about a flood that isn’t there',
+      body: 'A 2019 article about a downpour blocked the emergency line for half a day.' } },
 
   { reporter: 'A pupil from Sieradz',
     article: { outlet: 'MPK Sieradz · notice',
@@ -45,7 +53,9 @@ const POOL_EN = [
       lead: 'The city council passed a resolution setting a symbolic price for the monthly pass for primary and secondary school pupils. It can be bought in the app and at service points.' },
     ev: { zrodlo: 'The official site of the city transport company, on the city’s own domain. Same contact details since 2009.',
           data: 'The city council resolution of 24 Sep 2026 is published in the Public Information Bulletin, the official register of local government decisions.' },
-    lesson: 'Good news doesn’t have to be fake. An official source and a document in the public register settle it.' },
+    lesson: 'Good news doesn’t have to be fake. An official source and a document in the public register settle it.',
+    fallout: { headline: 'Pupils miss sign-up for the 1 zł pass',
+      body: 'We called the transport company’s notice a scam. Parents are complaining and the company asks for a correction.' } },
 
   { reporter: 'A mum of two pupils',
     post: { name: 'Mazovia Parents', time: '50 min',
@@ -54,7 +64,9 @@ const POOL_EN = [
       link: { title: 'Education board: remote learning in every school in the province from tomorrow' } },
     ev: { zrodlo: 'Echo Regionu is a news site running since 2005. The @RodziceMazowsza group has 80,000 members and does not check posts.',
           data: 'The Echo Regionu article is dated 11 Mar 2020, the first days of the pandemic. The education board has issued no notice today.' },
-    lesson: 'An old article about a real event, back as if it were today’s. The link looks credible, but the publication date says it all.' },
+    lesson: 'An old article about a real event, back as if it were today’s. The link looks credible, but the publication date says it all.',
+    fallout: { headline: 'Parents keep children home over an old article',
+      body: 'Thousands of pupils skipped school after a six-year-old story was shared. The education board issues a denial.' } },
 
   { reporter: 'A volunteer',
     article: { headline: 'Food bank collection in 40 shops across the region on Saturday',
@@ -62,7 +74,9 @@ const POOL_EN = [
       lead: 'Volunteers in yellow vests will collect long-life products. Donations go to soup kitchens and shelters for single mothers.' },
     ev: { zrodlo: 'The site has run since 1998. The author has covered social issues for 4 years.',
           data: 'Published today. The organiser’s website gives the same date and list of shops.' },
-    lesson: 'A calm tone, specific places and dates, confirmed by the organiser. This is what real announcements look like.' },
+    lesson: 'A calm tone, specific places and dates, confirmed by the organiser. This is what real announcements look like.',
+    fallout: { headline: 'Food bank collection gets half the expected donations',
+      body: 'Our ‘false’ stamp circulated online. Some donors took the collection for a scam.' } },
 
   { reporter: 'A pensioner from Radom',
     post: { name: 'Energy Allowance 2026', time: '4 h',
@@ -70,7 +84,9 @@ const POOL_EN = [
       shares: '12K' },
     ev: { zrodlo: 'The domain dodatek-energia-gov.pl.com was registered abroad 2 days ago. The .pl.com ending has nothing to do with government sites (those end in .gov.pl), and despite “gov” in its name the profile is not official.',
           data: 'Posted today. Similar “allowances” appeared in 2022 and 2024, each time linking to a different domain.' },
-    lesson: 'Phishing dressed up as a government office. No institution asks for your banking login through a form in a post. Check the ending: .pl.com is not .gov.pl.' },
+    lesson: 'Phishing dressed up as a government office. No institution asks for your banking login through a form in a post. Check the ending: .pl.com is not .gov.pl.',
+    fallout: { headline: 'Pensioners lose savings to fake ‘energy allowance’',
+      body: 'Police received 40 fraud reports. Victims say no one warned them about the form.' } },
 
   { reporter: 'A TV series fan',
     article: { headline: 'Jan Wiatrowski has died. The star of “House on the Warta” was 58',
@@ -78,7 +94,9 @@ const POOL_EN = [
       lead: 'Sad news has spread across the country. The family asks for privacy. Details in the gallery below.' },
     ev: { zrodlo: 'The site was set up a month ago and has no editorial footer. The page carries 14 ads and five redirects.',
           data: 'An hour ago the actor posted a photo from the set on his own profile, captioned “Alive and well, again.”' },
-    lesson: 'A fake death notice is classic clickbait. Before you post condolences, check the person’s official accounts and established media.' },
+    lesson: 'A fake death notice is classic clickbait. Before you post condolences, check the person’s official accounts and established media.',
+    fallout: { headline: 'Jan Wiatrowski: ‘You’ve killed me off for the third time’',
+      body: 'The actor posted a sarcastic video about the fake obituary. Commenters ask why nobody checked.' } },
 
   { reporter: 'A resident of Słoneczne estate',
     article: { outlet: 'Central Grid Company · notice',
@@ -87,7 +105,9 @@ const POOL_EN = [
       lead: 'The cause is upgrade work at the transformer station on Akacjowa Street. Please charge your devices in advance.' },
     ev: { zrodlo: 'The official site of the grid operator. Same address and helpline since 2011.',
           data: 'Published today, with the advance notice the law requires. The local paper carries the same notice.' },
-    lesson: 'A dry notice on an official site, with a specific date, time and reason. Nothing here plays on emotions.' },
+    lesson: 'A dry notice on an official site, with a specific date, time and reason. Nothing here plays on emotions.',
+    fallout: { headline: 'Słoneczne estate left without power — and without warning',
+      body: 'We marked the operator’s notice as fake. Residents didn’t prepare, and fridges sat warm for six hours.' } },
 
   // ---------- tier 2: photos ----------
   { reporter: 'A pensioner from Kielce',
@@ -98,7 +118,9 @@ const POOL_EN = [
     ev: { zrodlo: 'Account created in 2023. Posts mostly alarming content about fuel prices.',
           data: 'Posted today, 8:15. Local stations report no shortages.',
           obraz: 'The photo was first published by a foreign news site on 3 Mar 2022. It shows a station in another country — the prices on the sign are in a foreign currency.' },
-    lesson: 'A real photo in a false context. A reverse image search shows within seconds where it really comes from. A call to panic (“fill up!”) is a red flag.' },
+    lesson: 'A real photo in a false context. A reverse image search shows within seconds where it really comes from. A call to panic (“fill up!”) is a red flag.',
+    fallout: { headline: 'Queues at petrol stations after a fake photo',
+      body: 'Drivers stockpiled fuel after a post with a 2022 photo. Two stations in Kielce really did run dry.' } },
 
   { reporter: 'A mum from Kraków',
     post: { name: 'Kraków News 24', time: '40 min',
@@ -108,7 +130,9 @@ const POOL_EN = [
     ev: { zrodlo: 'Account created 3 weeks ago and, despite its name, not linked to any newsroom. 40,000 followers arrived in a single week.',
           data: 'Posted today, 10:20. The city guard has issued no statement.',
           obraz: 'No earlier appearances of the image. Analysis points to an AI-generated picture: the swing’s chain grows into the tree, and the wolf’s reflection in the puddle has five legs.' },
-    lesson: 'An AI-generated image. Look for errors in the details (hands, lettering, reflections) and check whether anyone else confirms the event.' },
+    lesson: 'An AI-generated image. Look for errors in the details (hands, lettering, reflections) and check whether anyone else confirms the event.',
+    fallout: { headline: 'Schools near the Planty close playgrounds over an AI wolf',
+      body: 'The city guard searched the park. There was no wolf, only an image from a generator.' } },
 
   { reporter: 'A bus driver',
     article: { headline: '20 new electric buses hit the streets of Lublin',
@@ -118,7 +142,9 @@ const POOL_EN = [
     ev: { zrodlo: 'A local news site running since 2011, with editors and authors listed in the footer.',
           data: 'Published today, 10:02.',
           obraz: 'The photo appeared this morning on the city transport company’s website, credited to a named photographer.' },
-    lesson: 'Everything checks out: a local source, today’s date and a photo from the operator’s official site.' },
+    lesson: 'Everything checks out: a local source, today’s date and a photo from the operator’s official site.',
+    fallout: { headline: 'Lublin bus operator: our buses are real',
+      body: 'We called a genuine photo fake. The operator posted a video from the depot and asks for a correction.' } },
 
   { reporter: 'A civics teacher',
     post: { name: 'Marek the Patriot', time: '2 h',
@@ -129,7 +155,9 @@ const POOL_EN = [
     ev: { zrodlo: 'Szyderca.pl is a satirical site. Its footer says: “All articles are fiction and jokes.”',
           data: 'The article was published on 1 Apr 2026.',
           obraz: 'A photo from the chamber taken in 2024, used as an illustration.' },
-    lesson: 'Satire taken seriously. Before you get outraged, check what the source site is and whether the story is from 1 April.' },
+    lesson: 'Satire taken seriously. Before you get outraged, check what the source site is and whether the story is from 1 April.',
+    fallout: { headline: 'Szyderca.pl thanks us for the publicity',
+      body: 'The satirical site boasts record traffic since its ‘abolition of Mondays’ was taken as real.' } },
 
   { reporter: 'A Widzew resident',
     article: { headline: 'Warehouse fire in Widzew. No one injured',
@@ -139,7 +167,9 @@ const POOL_EN = [
     ev: { zrodlo: 'The site has run since 2014. The author has covered events in the region for years.',
           data: 'Published today at 6:50, updated at 9:10.',
           obraz: 'The photo was posted today at 6:30 by the local fire station on its own profile.' },
-    lesson: 'Fast but reliable reporting: an updated article, an official photo from the emergency services and a named author.' },
+    lesson: 'Fast but reliable reporting: an updated article, an official photo from the emergency services and a named author.',
+    fallout: { headline: 'Widzew residents didn’t shut their windows',
+      body: 'We dismissed the smoke warning as false. Two people were taken to hospital with irritated airways.' } },
 
   { reporter: 'A student from Wrocław',
     post: { name: 'Voice of the People', time: '3 h',
@@ -149,7 +179,9 @@ const POOL_EN = [
     ev: { zrodlo: 'The account has existed since 2020 and posts political content from various sources.',
           data: 'A registered demonstration did take place in Warsaw yesterday. Police estimate 3,000 participants.',
           obraz: 'The photo is from the final night of a music festival in another city, published on 28 Jun 2019 by a photo agency.' },
-    lesson: 'A real event, someone else’s photo. A picture from another place and time is meant to show a scale that never happened.' },
+    lesson: 'A real event, someone else’s photo. A picture from another place and time is meant to show a scale that never happened.',
+    fallout: { headline: 'Row over numbers after fake crowd photo',
+      body: 'A festival photo circulated as proof of ‘half a million people’. Trust in protest coverage fell on both sides.' } },
 
   { reporter: 'An angler near Płock',
     post: { name: 'Mazovia Alert', time: '1 h',
@@ -159,7 +191,9 @@ const POOL_EN = [
     ev: { zrodlo: 'Account created a week ago. Every post is a sensation with no sources.',
           data: 'Posted today. No emergency service or local outlet reports anything.',
           obraz: 'A photomontage: the fin comes from a 2015 photo taken in Australia, the bridge from a stock photo of Płock. The fin’s shadow falls the opposite way to the shadows of the bridge piers.' },
-    lesson: 'A photomontage. Reverse image search finds both sources, and a careful eye sees shadows falling in different directions.' },
+    lesson: 'A photomontage. Reverse image search finds both sources, and a careful eye sees shadows falling in different directions.',
+    fallout: { headline: 'Anglers avoid the Vistula over shark photomontage',
+      body: 'A water sports centre in Płock cancelled classes. Biologists point out that sharks don’t live in fresh water.' } },
 
   { reporter: 'A tourist from Gdańsk',
     article: { headline: 'First snow in Zakopane. 15 cm on Kasprowy Wierch',
@@ -169,7 +203,9 @@ const POOL_EN = [
     ev: { zrodlo: 'A regional site running since 2009, author named.',
           data: 'Published today, 7:45. The weather station on Kasprowy Wierch records −3°C and snowfall.',
           obraz: 'The photo is a frame from today’s recording of a public webcam in Zakopane, 7:12.' },
-    lesson: 'Snow in October sounds odd, but in the Tatras it’s normal. Unusual doesn’t mean false: weather data and the webcam confirm it.' },
+    lesson: 'Snow in October sounds odd, but in the Tatras it’s normal. Unusual doesn’t mean false: weather data and the webcam confirm it.',
+    fallout: { headline: 'Tourists head into the Tatras in trainers',
+      body: 'We called the snow report false. Rescuers brought a dozen people without winter gear down from the trails.' } },
 
   { reporter: 'A local councillor',
     post: { name: 'Kraków No Spin', time: '2 h',
@@ -179,7 +215,9 @@ const POOL_EN = [
     ev: { zrodlo: 'An account run by local activists since 2021, often critical of the city authorities.',
           data: 'The festival in the park did take place yesterday. Cleaning crews worked until midnight.',
           obraz: 'The photo was published by a site in another city on 12 Aug 2021, after an illegal party. It does not show this park.' },
-    lesson: 'A real event, but a photo from another situation. Even fair criticism loses credibility when it leans on someone else’s picture.' },
+    lesson: 'A real event, but a photo from another situation. Even fair criticism loses credibility when it leans on someone else’s picture.',
+    fallout: { headline: 'Festival organisers demand an apology',
+      body: 'A photo of rubbish from another city was pinned on the city festival. Cleaners posted photos of the clean park in the morning.' } },
 
   { reporter: 'A taxi driver',
     post: { name: 'Last Minute', time: '35 min',
@@ -189,7 +227,9 @@ const POOL_EN = [
     ev: { zrodlo: 'An anonymous account created this month.',
           data: 'No station broadcast this today; it is not in any programme archive.',
           obraz: 'The screenshot is not in any TV archive. A free “fake news” meme generator offers the exact same banner layout.' },
-    lesson: 'A doctored screenshot. A BREAKING banner takes a minute to make in a meme generator. Look for the footage on the station’s own website.' },
+    lesson: 'A doctored screenshot. A BREAKING banner takes a minute to make in a meme generator. Look for the footage on the station’s own website.',
+    fallout: { headline: 'Shops besieged ahead of ‘curfew’',
+      body: 'A doctored TV screenshot set off panic buying. The station plans to sue the authors of the fake.' } },
 
   // ---------- tier 3: documents ----------
   { reporter: 'A nurse from Gdańsk',
@@ -201,7 +241,9 @@ const POOL_EN = [
           data: 'The graphic is from today. The interview it quotes was broadcast on the radio on 2 Oct 2026.',
           obraz: 'The minister’s photo comes from the ministry’s official gallery.',
           dokument: 'Full interview transcript: “Saying that vaccinating children makes no sense is a harmful myth we are fighting.”' },
-    lesson: 'A quote cut out of context so it means the opposite. A quote graphic is not a source. Find the full statement.' },
+    lesson: 'A quote cut out of context so it means the opposite. A quote graphic is not a source. Find the full statement.',
+    fallout: { headline: 'Child vaccination bookings drop',
+      body: 'The minister’s cut quote circulated as an ‘admission’. Clinics report cancelled appointments.' } },
 
   { reporter: 'A barista from Poznań',
     article: { outlet: 'Health Today',
@@ -213,7 +255,9 @@ const POOL_EN = [
           data: 'The study was published in a scientific journal a week ago.',
           obraz: 'A stock photo.',
           dokument: 'The study was done on 24 mice given caffeine at a dose equal to about 60 cups a day for a human. The authors write: “the results should not be extrapolated to humans”.' },
-    lesson: 'The headline twists a real study. Who was studied, how many, at what dose? The answers are in the paper, not the title.' },
+    lesson: 'The headline twists a real study. Who was studied, how many, at what dose? The answers are in the paper, not the title.',
+    fallout: { headline: 'Cafés: customers ask whether coffee will kill them',
+      body: 'The story about a study on mice was shared 90,000 times. Cardiologists explain on TV that there is no reason to panic.' } },
 
   { reporter: 'A farmer near Płock',
     article: { headline: 'September 2026 the warmest on record in Poland',
@@ -224,7 +268,9 @@ const POOL_EN = [
           data: 'Published today, 11:15.',
           obraz: 'The chart comes from the monthly report of the national weather service.',
           dokument: 'Monthly report: average September temperature 17.9°C, the highest since 1951. The figures in the article match the report.' },
-    lesson: 'The numbers in the article match the source document. This is what reliable journalism looks like.' },
+    lesson: 'The numbers in the article match the source document. This is what reliable journalism looks like.',
+    fallout: { headline: 'Weather service corrects our ‘correction’',
+      body: 'We stamped the record-September data as untrue. Our stamp now appears on profiles that deny climate change.' } },
 
   { reporter: 'A gaming fan, age 13',
     post: { time: '12 min',
@@ -235,7 +281,9 @@ const POOL_EN = [
           data: 'Posted today. Identical “giveaways” appeared this month in the name of four other creators.',
           obraz: 'The phone photo is a stock image.',
           dokument: 'There is no word of a contest on the creator’s real channel. The form collects payment card details.' },
-    lesson: 'A phishing scam. A typo in the account name, time pressure and a request for card details: three red flags at once.' },
+    lesson: 'A phishing scam. A typo in the account name, time pressure and a request for card details: three red flags at once.',
+    fallout: { headline: 'Children enter parents’ card details in fake contest',
+      body: 'A bank blocks hundreds of cards after the ‘smartphone giveaway’. The real Kuba Gra warns viewers on his channel.' } },
 
   { reporter: 'A head teacher',
     article: { outlet: 'Daily Online Gazette',
@@ -245,7 +293,9 @@ const POOL_EN = [
     ev: { zrodlo: 'The site has existed for a year, with no names in its editorial footer.',
           data: 'Published today; a dozen sites reprinted it within an hour.',
           dokument: 'The institute published no such report. In its latest study the share of pupils with serious reading difficulties was 17%.' },
-    lesson: 'A made-up figure pinned to a serious-sounding institution. If the article doesn’t link to the report, find it yourself.' },
+    lesson: 'A made-up figure pinned to a serious-sounding institution. If the article doesn’t link to the report, find it yourself.',
+    fallout: { headline: 'Institute: we never published a 70% report',
+      body: 'The made-up figure reached a city council debate. The institute plans a complaint.' } },
 
   { reporter: 'A teenager’s parent',
     article: { headline: 'Scientists confirm: video games raise IQ by 20 points',
@@ -256,7 +306,9 @@ const POOL_EN = [
           data: 'The study was published in a scientific journal 3 days ago.',
           obraz: 'A stock photo.',
           dokument: 'The study involved 40 adults. After 6 weeks of gaming, their score on one working-memory test improved by 4%. The paper does not mention IQ at all.' },
-    lesson: 'A small effect on one test grew into “20 IQ points” in the headline. Compare the numbers in the title with the numbers in the study.' },
+    lesson: 'A small effect on one test grew into “20 IQ points” in the headline. Compare the numbers in the title with the numbers in the study.',
+    fallout: { headline: 'Parents buy games ‘for intelligence’',
+      body: 'The 20-IQ-points headline turned up in game shop ads. The study’s authors set the record straight in the media.' } },
 
   { reporter: 'A school counsellor',
     article: { headline: 'Report: one in three pupils has faced online hate',
@@ -265,7 +317,9 @@ const POOL_EN = [
     ev: { zrodlo: 'The site has run since 1998; the author specialises in education.',
           data: 'Published today, a day after the report came out.',
           dokument: 'Report of the pupils’ rights ombudsman, p. 14: 34% of respondents faced online hate within a year. Sample and method are described in the appendix.' },
-    lesson: 'The figures in the article match the report, and the report explains its method. This is how to cite research properly.' },
+    lesson: 'The figures in the article match the report, and the report explains its method. This is how to cite research properly.',
+    fallout: { headline: 'Pupils’ ombudsman: doubting the report hurts victims of hate',
+      body: 'We called a sound report unreliable. Schools paused an anti-hate programme ‘until it’s cleared up’.' } },
 
   { reporter: 'A secondary school student',
     post: { name: 'Wise Quotes', time: '5 h',
@@ -276,7 +330,9 @@ const POOL_EN = [
           data: 'The graphic has circulated since 2019, earlier attributed to a different name.',
           obraz: 'The portrait is a stock photo of a model, described in the photo bank as “elderly man with glasses”.',
           dokument: 'No one of that name appears on the list of Nobel laureates. The quote is not in any book or interview.' },
-    lesson: 'An invented authority. A serious-sounding title and a portrait are there to lend the quote weight. Check whether the person exists at all.' },
+    lesson: 'An invented authority. A serious-sounding title and a portrait are there to lend the quote weight. Check whether the person exists at all.',
+    fallout: { headline: 'Non-existent Nobel laureate quoted at city council',
+      body: 'The ‘Prof. Halicki’ quote was read out in a councillor’s speech. The recording became a meme.' } },
 
   { reporter: 'A resident of Zielona Dolina',
     article: { headline: 'Crime in Zielona Dolina up 100%! Residents afraid to leave their homes',
@@ -287,7 +343,9 @@ const POOL_EN = [
           data: 'Police figures for the third quarter were published yesterday.',
           obraz: 'A stock photo, not from this municipality.',
           dokument: 'Police report: 4 bicycle thefts were reported in the third quarter, against 2 a year earlier. No other crimes were recorded. The municipality has 900 residents.' },
-    lesson: 'Percentages of small numbers are the scariest. A “100% rise” here means two more bikes. Always ask: 100% of what?' },
+    lesson: 'Percentages of small numbers are the scariest. A “100% rise” here means two more bikes. Always ask: 100% of what?',
+    fallout: { headline: 'Zielona Dolina residents want private security',
+      body: 'After the ‘100% crime rise’ story, the municipality received a petition. It was about two bikes.' } },
 
   { reporter: 'A history teacher',
     post: { name: 'Atlas School Publishing', time: '1 h',
@@ -296,7 +354,9 @@ const POOL_EN = [
     ev: { zrodlo: 'The publisher’s official, verified profile, active since 2012.',
           data: 'Posted today.',
           dokument: 'The erratum on the publisher’s website confirms the error and gives the correct date. Schools received the same notice.' },
-    lesson: 'A correction is a sign of reliability, not weakness. The source admitted the error and showed how it is fixing it.' }
+    lesson: 'A correction is a sign of reliability, not weakness. The source admitted the error and showed how it is fixing it.',
+    fallout: { headline: 'Publisher asks why its apology is ‘false’',
+      body: 'We marked a correction as untrue. Teachers never heard about the textbook error.' } }
 ];
 
 if (typeof module !== 'undefined') module.exports = { POOL_EN };

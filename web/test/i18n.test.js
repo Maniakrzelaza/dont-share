@@ -45,6 +45,7 @@ test('every case has an English translation of every text the player reads', () 
     const en = POOL_EN[i], where = `case ${i} (${c.reporter})`;
     assert.ok(en.reporter, `${where}: reporter`);
     assert.ok(en.lesson, `${where}: lesson`);
+    assert.ok(en.fallout && en.fallout.headline && en.fallout.body, `${where}: fallout`);
     const body = en[c.kind];
     assert.ok(body, `${where}: ${c.kind} text missing`);
     TEXT_PATHS[c.kind].forEach(k => assert.ok(body[k], `${where}: ${c.kind}.${k}`));
