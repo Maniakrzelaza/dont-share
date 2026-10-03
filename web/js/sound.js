@@ -92,7 +92,8 @@ const Sound = (() => {
 
     click: play((a, t) => burst(a, t, 0.02, 0.15, 'highpass', 2500)),
 
-    tick: play((a, t) => burst(a, t, 0.015, 0.12, 'bandpass', 4200, 8)),
+    // Ciche i niższe niż reszta: gra w tle przez całą ostatnią godzinę, więc nie może męczyć.
+    tick: play((a, t) => burst(a, t, 0.012, 0.035, 'bandpass', 3000, 6)),
 
     bell: play((a, t) => {
       tone(a, t, 1.4, 0.2, 880);
