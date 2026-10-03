@@ -1,0 +1,6 @@
+# Kontekst budowania obrazu api to cały katalog repo; wysyłamy do Dockera tylko to, czego potrzebuje.
+*
+!web/js/cases.js
+!web/js/scenes.js
+!api/score.js
+!api/server.js

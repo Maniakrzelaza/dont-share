@@ -14,9 +14,9 @@ name: deploy
 on:
   push:
     branches: [main]
-    paths: [web/**, deploy/**, .github/workflows/deploy.yml]
+    paths: [web/**, api/**, deploy/**, .dockerignore, .github/workflows/deploy.yml]
   pull_request:
-    paths: [web/**]
+    paths: [web/**, api/**]
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,9 @@ jobs:
       # Every drawn run must be playable: complete cases, decidable with that day's tools.
       - name: Test the case pool and drawing rules
         run: node --test web/test/*.test.js
+      # The leaderboard must score a run exactly as the game does.
+      - name: Test the leaderboard scoring
+        run: node --check api/server.js && node --test api/test/*.test.js
 
   image:
     needs: check
@@ -39,15 +42,21 @@ jobs:
       contents: read
       packages: write
     outputs:
-      ref: ${{ steps.ref.outputs.ref }}
+      web: ${{ steps.ref.outputs.web }}
+      api: ${{ steps.ref.outputs.api }}
     steps:
       - uses: actions/checkout@v4
       - id: ref
-        # GHCR requires lowercase names; the owner here has capitals.
-        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}/web:${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+        # GHCR requires lowercase names; the owner here has capitals. Both images share the SHA tag:
+        # a release is the pair.
+        run: |
+          echo "web=ghcr.io/${GITHUB_REPOSITORY,,}/web:${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+          echo "api=ghcr.io/${GITHUB_REPOSITORY,,}/api:${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
       - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-      - run: docker build --build-arg DS_BUILD_SHA="${GITHUB_SHA::8}" -t "${{ steps.ref.outputs.ref }}" web
-      - run: docker push "${{ steps.ref.outputs.ref }}"
+      - run: docker build --build-arg DS_BUILD_SHA="${GITHUB_SHA::8}" -t "${{ steps.ref.outputs.web }}" web
+      # Built from the repository root: the API scores runs with the game's own web/js/cases.js.
+      - run: docker build -f api/Dockerfile -t "${{ steps.ref.outputs.api }}" .
+      - run: docker push "${{ steps.ref.outputs.web }}" && docker push "${{ steps.ref.outputs.api }}"
 
   production:
     needs: image
@@ -81,7 +90,8 @@ jobs:
           HOST: ${{ vars.DS_DEPLOY_HOST }}
           USER_: ${{ vars.DS_DEPLOY_USER }}
           DOMAIN: ${{ vars.DS_DOMAIN }}
-          IMAGE: ${{ needs.image.outputs.ref }}
+          WEB_IMAGE: ${{ needs.image.outputs.web }}
+          API_IMAGE: ${{ needs.image.outputs.api }}
           REG_USER: ${{ github.actor }}
           REG_PASS: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -90,4 +100,4 @@ jobs:
           rsync -az --delete -e "$RSH" deploy/ "$USER_@$HOST:/opt/dontshare/"
           # The job token can pull for the duration of this job, which is all the server needs —
           # containers restart from the local image copy afterwards.
-          $RSH "$USER_@$HOST" "DS_REGISTRY_HOST=ghcr.io DS_REGISTRY_USER=$REG_USER DS_REGISTRY_PASSWORD=$REG_PASS DS_DOMAIN=$DOMAIN /opt/dontshare/deploy.sh $IMAGE"
+          $RSH "$USER_@$HOST" "DS_REGISTRY_HOST=ghcr.io DS_REGISTRY_USER=$REG_USER DS_REGISTRY_PASSWORD=$REG_PASS DS_DOMAIN=$DOMAIN /opt/dontshare/deploy.sh $WEB_IMAGE $API_IMAGE"

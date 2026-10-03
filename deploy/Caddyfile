@@ -13,5 +13,12 @@
 		-Server
 	}
 
-	reverse_proxy web:80
+	# The leaderboard API. Everything else is the game itself.
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		reverse_proxy web:80
+	}
 }

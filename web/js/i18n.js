@@ -113,6 +113,18 @@ const UI = {
     zoomMiss: 'W tym miejscu nic nie budzi podejrzeń.', zoomAlready: 'To już jest w teczce.',
     eyeName: 'Twoje oko', clueLbl: 'Do wypatrzenia na zdjęciu:', clueFound: 'wypatrzone', clueMissed: 'przeoczone',
 
+    boardTitle: n => `Ranking dnia #${n}`,
+    boardIntro: 'Zapisz wynik pod pseudonimem. Do rankingu trafia pierwsze podejście dnia.',
+    boardName: 'Pseudonim', boardSubmit: 'Zapisz w rankingu', boardSaving: 'Zapisuję…',
+    boardSaved: (r, n) => `Jesteś na ${r}. miejscu z ${n}.`,
+    boardReplay: 'To nie było twoje pierwsze dzisiejsze podejście, więc wynik nie trafia do rankingu.',
+    boardRandom: 'Ranking jest dla wyzwania dnia, gdzie wszyscy grają te same zgłoszenia.',
+    boardEmpty: 'Nikt jeszcze nie zapisał dziś wyniku.',
+    boardError: 'Ranking jest teraz niedostępny.',
+    boardErr: { name_invalid: 'Pseudonim: od 2 do 20 liter lub cyfr, bez wulgaryzmów.', name_taken: 'Ten pseudonim jest już w dzisiejszym rankingu. Wybierz inny.', rate: 'Za dużo prób z tego urządzenia. Spróbuj jutro.', date: 'To wyzwanie już się skończyło.', invalid: 'Nie udało się zapisać wyniku.' },
+    boardYou: 'ty', boardPts: 'pkt', boardMore: n => `i ${n} więcej`,
+    boardLeader: (name, pts) => `Dziś prowadzi ${name} z wynikiem ${pts} pkt.`,
+
     profileTitle: 'Twój profil weryfikatora', profileWeak: 'Tu było najtrudniej', profileStrong: 'Tu nie dajesz się nabrać',
     profileClean: 'Żaden rodzaj fałszywki cię nie zmylił.', profileCount: (f, n) => `${f} z ${n}`,
     types: {
@@ -257,6 +269,18 @@ const UI = {
     zoomClose: 'Back to the desk', zoomFound: x => `Spotted: ${x} Added to your folder.`,
     zoomMiss: 'Nothing suspicious here.', zoomAlready: 'That’s already in your folder.',
     eyeName: 'Your eye', clueLbl: 'To spot in the photo:', clueFound: 'spotted', clueMissed: 'missed',
+
+    boardTitle: n => `Daily leaderboard #${n}`,
+    boardIntro: 'Save your score under a nickname. Only your first attempt of the day counts.',
+    boardName: 'Nickname', boardSubmit: 'Save to leaderboard', boardSaving: 'Saving…',
+    boardSaved: (r, n) => `You’re number ${r} of ${n}.`,
+    boardReplay: 'This wasn’t your first attempt today, so it doesn’t go on the leaderboard.',
+    boardRandom: 'The leaderboard is for the daily challenge, where everyone plays the same reports.',
+    boardEmpty: 'No one has saved a score today yet.',
+    boardError: 'The leaderboard is unavailable right now.',
+    boardErr: { name_invalid: 'Nickname: 2 to 20 letters or digits, nothing offensive.', name_taken: 'That nickname is already on today’s leaderboard. Pick another.', rate: 'Too many attempts from this device. Try again tomorrow.', date: 'This challenge has already ended.', invalid: 'Your score couldn’t be saved.' },
+    boardYou: 'you', boardPts: 'pts', boardMore: n => `and ${n} more`,
+    boardLeader: (name, pts) => `Today’s leader: ${name} with ${pts} pts.`,
 
     profileTitle: 'Your fact-checker profile', profileWeak: 'Where it was hardest', profileStrong: 'Where you don’t get fooled',
     profileClean: 'No kind of fake fooled you.', profileCount: (f, n) => `${f} of ${n}`,

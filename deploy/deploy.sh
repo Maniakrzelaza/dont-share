@@ -7,7 +7,11 @@
 # current — the pipeline does.
 #
 # Usage:
-#   ./deploy.sh <web-image>
+#   ./deploy.sh <web-image> <api-image>
+#
+# Both images come from the same commit and are passed together: the API scores runs with the
+# game's own rules (web/js/cases.js), so a game and an API from different commits could disagree
+# about what a report's answer is.
 #
 # From the environment:
 #   DS_DOMAIN                                         domain the edge serves (required)
@@ -22,7 +26,9 @@ log() { printf '\n== %s\n' "$1"; }
 die() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 
 WEB_IMAGE="${1:-}"
+API_IMAGE="${2:-}"
 [[ -n "$WEB_IMAGE" ]] || die "pass the web image reference as the first argument"
+[[ -n "$API_IMAGE" ]] || die "pass the api image reference as the second argument"
 DOMAIN="${DS_DOMAIN:-}"
 [[ -n "$DOMAIN" ]] || die "DS_DOMAIN is missing — set the DS_DOMAIN variable in the GitHub environment"
 
@@ -49,11 +55,12 @@ fi
 # afterwards would report the release we are in the middle of deploying as "previous".
 PREVIOUS="$(docker compose config --images 2>/dev/null | tr '\n' ' ' || true)"
 
-log "Release web=$WEB_IMAGE domain=$DOMAIN"
+log "Release web=$WEB_IMAGE api=$API_IMAGE domain=$DOMAIN"
 # The image reference lives in .env rather than in the compose file, so a rollback is a matter of
 # passing an earlier tag — no repository change required.
 {
 	printf 'DS_WEB_IMAGE=%s\n' "$WEB_IMAGE"
+	printf 'DS_API_IMAGE=%s\n' "$API_IMAGE"
 	printf 'DS_DOMAIN=%s\n' "$DOMAIN"
 } >.env
 
@@ -107,7 +114,7 @@ edge_failed() {
 	printf 'curl, this time explaining itself:\n' >&2
 	curl -sS --max-time 5 --resolve "$DOMAIN:443:127.0.0.1" -o /dev/null "$2" >&2 || true
 	printf 'If DNS for %s does not point at this machine yet, Caddy has no certificate and this check cannot pass.\n' "$DOMAIN" >&2
-	docker compose logs --tail 50 caddy >&2 || true
+	docker compose logs --tail 50 caddy api >&2 || true
 	die "deployment failed the edge health check"
 }
 
@@ -129,7 +136,21 @@ IMAGE_ANSWER="$("${CURL_EDGE[@]}" -o /dev/null -w '%{http_code} %{content_type}'
 [[ "$IMAGE_ANSWER" == "200 image/png"* ]] ||
 	edge_failed "/dontshare.png answered \"$IMAGE_ANSWER\" through Caddy, expected 200 image/png." "$BASE/dontshare.png"
 
+# The leaderboard goes through the edge too. A 200 alone is not enough — a routing mistake would
+# hand /api/* to the game, which answers 200 with HTML — so the body must be the API's own JSON.
+API_HEALTHY=0
+for _ in $(seq 1 10); do
+	API_ANSWER="$("${CURL_EDGE[@]}" "$BASE/api/health" || true)"
+	if [[ "$API_ANSWER" == *'"ok":true'* ]]; then
+		API_HEALTHY=1
+		break
+	fi
+	sleep 1
+done
+[[ $API_HEALTHY -eq 1 ]] ||
+	edge_failed "/api/health answered \"${API_ANSWER:0:80}\" through Caddy, expected {\"ok\":true}." "$BASE/api/health"
+
 log "Cleaning up unused images"
 docker image prune -f --filter "until=168h" >/dev/null || true
 
-log "Deployed: web=$WEB_IMAGE at https://$DOMAIN"
+log "Deployed: web=$WEB_IMAGE api=$API_IMAGE at https://$DOMAIN"

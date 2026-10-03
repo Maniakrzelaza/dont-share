@@ -379,3 +379,27 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outlin
 .profile .weak .count { font: 600 13px var(--font-mono); color: var(--false); margin-left: 6px; }
 .profile .weak p { margin: 4px 0 0; font-size: 14px; max-width: 62ch; }
 .profile .strong { margin: 0; font-size: 14.5px; }
+
+/* ranking wyzwania dnia */
+.board { border: 2px solid var(--ink); border-radius: 6px; padding: 14px 16px; margin: 0 0 22px; }
+.board-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.board-form label { font: 600 11.5px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.board-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.board-row input {
+  flex: 1 1 180px; min-width: 0; font: 500 16px var(--font-body); padding: 10px 12px;
+  border: 2px solid var(--ink); border-radius: 4px; background: #fff; color: var(--ink);
+}
+.board-row input:focus-visible { outline: 3px solid var(--signal); outline-offset: 1px; }
+.board-note { margin: 0 0 8px; font: 600 13.5px var(--font-mono); min-height: 0; }
+.board-note:empty { display: none; }
+.board-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.board-list li { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; gap: 8px; padding: 6px 8px; border-radius: 3px; }
+.board-list li:nth-child(odd) { background: var(--paper-2); }
+.board-list li.me { background: var(--signal); }
+.board-list .rank { font: 600 14px var(--font-mono); color: var(--ink-muted); }
+.board-list li.me .rank { color: var(--ink); }
+.board-list .who { overflow-wrap: anywhere; font-weight: 600; }
+.board-list .who i { font-style: normal; font-weight: 400; }
+.board-list .pts { font: 600 14px var(--font-mono); }
+.mode .leader { color: var(--ink); font-weight: 500; }
+.mode .leader:empty { display: none; }

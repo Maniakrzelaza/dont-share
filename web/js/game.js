@@ -118,6 +118,7 @@ function renderIntro() {
       <div class="mode">
         <button class="go" id="go-daily">${t.modeDaily(dailyNumber(dailyKey()))}</button>
         <p>${t.modeDailySub}${dailyScore(dailyKey()) !== null ? ` <b>${t.dailyPlayed(dailyScore(dailyKey()))}</b>` : ''}</p>
+        <p class="leader" id="leader"></p>
       </div>
       <div class="mode">
         <button class="go ghost" id="go-random">${t.modeRandom}</button>
@@ -125,6 +126,10 @@ function renderIntro() {
       </div>
     </div>`);
   document.getElementById('go-daily').onclick = () => startRun('daily');
+  fetchBoard(dailyKey()).then(b => {
+    const el = document.getElementById('leader');
+    if (el && b && b.top.length) el.textContent = t.boardLeader(b.top[0].name, b.top[0].score);
+  });
   document.getElementById('go-random').onclick = () => startRun('random');
 }
 
@@ -357,7 +362,7 @@ function stamp(v) {
   S.score += pts;
   S.trust = Math.max(0, Math.min(100, S.trust + dTrust));
   S.last = { verdict: v, correct, pin: S.pin, pinGood, pts, dTrust, reach };
-  S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, correct, missed: false, pinGood, reach });
+  S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, pin: S.pin, correct, missed: false, pinGood, reach });
   if (coaching()) finishTutorial();
   Sound.stamp();
   setTimeout(correct ? Sound.good : Sound.bad, 220);
@@ -409,7 +414,7 @@ function next() {
 function endDay() {
   const missed = S.screen === 'desk' ? dayCases().slice(S.idx) : [];
   if (S.screen === 'desk') Sound.bell();
-  missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, correct: false, missed: true, pinGood: false, reach: 0 }));
+  missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, pin: null, correct: false, missed: true, pinGood: false, reach: 0 }));
   S.trust = Math.max(0, S.trust - missed.length * 10);
   S.last = null;
   S.screen = S.trust <= 0 ? 'end' : 'dayEnd';
@@ -491,6 +496,7 @@ function renderEnd() {
   const spread = S.log.reduce((sum, x) => sum + harmfulReach(x), 0);
   const card = shareText(st, spread);
   if (S.mode === 'daily' && dailyScore(S.daily) === null) {
+    S.firstDaily = true;
     try { localStorage.setItem('ds-daily-' + S.daily, String(S.score)); } catch (e) { /* zablokowany storage */ }
   }
   $app.innerHTML = memo(`
@@ -514,6 +520,7 @@ function renderEnd() {
       </div>
       <p class="again-hint" id="share-note" aria-live="polite"></p>
     </section>
+    <section class="board" id="board" aria-live="polite"></section>
     ${profileHTML()}
     ${pressHTML(falloutOf(S.day), t.finalPressTitle, S.day + 1 < DAYS.length ? t.days[S.day + 1].date : t.pressFinalDate)}
     <h2>${t.cheatTitle}</h2>
@@ -522,6 +529,71 @@ function renderEnd() {
     <p class="again-hint">${t.againHint}</p>`);
   document.getElementById('go').onclick = () => { S = fresh(); render(); };
   bindShare(card);
+  renderBoard();
+}
+
+// Ranking wyzwania dnia (api/server.js). Gra wysyła decyzje, a serwer sam liczy wynik.
+const API = '/api';
+async function fetchBoard(date) {
+  try {
+    const r = await fetch(`${API}/leaderboard?date=${date}`);
+    return r.ok ? await r.json() : null;
+  } catch (e) { return null; }
+}
+
+const savedName = () => { try { return localStorage.getItem('ds-name') || ''; } catch (e) { return ''; } };
+const boardEntry = () => { try { return localStorage.getItem('ds-board-' + S.daily); } catch (e) { return null; } };
+
+function decisionsForBoard() {
+  return DAYS.map((_, d) => S.log.filter(x => x.day === d).map(x => ({ v: x.verdict, p: x.pin || null }))).filter(day => day.length);
+}
+
+async function renderBoard(note) {
+  const t = T(), el = document.getElementById('board');
+  if (!el) return;
+  if (S.mode !== 'daily') { el.innerHTML = `<p class="quiet">${t.boardRandom}</p>`; return; }
+  const mine = boardEntry();
+  const canSubmit = S.firstDaily && !mine;
+  const form = canSubmit ? `<form class="board-form" id="board-form">
+      <label for="board-name">${t.boardName}</label>
+      <div class="board-row"><input id="board-name" name="name" maxlength="20" autocomplete="nickname" value="${esc(savedName())}" required>
+      <button class="go" id="board-submit">${t.boardSubmit}</button></div>
+    </form>` : '';
+  const head = `<div class="share-head"><b>${t.boardTitle(dailyNumber(S.daily))}</b><span>${canSubmit ? t.boardIntro : mine ? '' : t.boardReplay}</span></div>`;
+  el.innerHTML = head + form + `<p class="board-note" id="board-note">${note || ''}</p><div id="board-list"></div>`;
+  const b = await fetchBoard(S.daily);
+  const list = document.getElementById('board-list');
+  if (!list) return;
+  if (!b) { list.innerHTML = `<p class="quiet">${t.boardError}</p>`; }
+  else if (!b.top.length) { list.innerHTML = `<p class="quiet">${t.boardEmpty}</p>`; }
+  else {
+    list.innerHTML = `<ol class="board-list">${b.top.map(r => `<li class="${mine && r.name === mine ? 'me' : ''}">
+        <span class="rank">${r.rank}</span><span class="who">${esc(r.name)}${mine && r.name === mine ? ` <i>(${t.boardYou})</i>` : ''}</span>
+        <span class="pts">${fmt(r.score)} ${t.boardPts}</span></li>`).join('')}</ol>${b.total > b.top.length ? `<p class="quiet">${t.boardMore(b.total - b.top.length)}</p>` : ''}`;
+  }
+  const f = document.getElementById('board-form');
+  if (f) f.onsubmit = e => { e.preventDefault(); submitBoard(); };
+}
+
+async function submitBoard() {
+  const t = T(), input = document.getElementById('board-name'), btn = document.getElementById('board-submit');
+  const note = document.getElementById('board-note');
+  const name = input.value.trim();
+  btn.disabled = true; btn.textContent = t.boardSaving;
+  try {
+    const r = await fetch(`${API}/scores`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: S.daily, name, decisions: decisionsForBoard() })
+    });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.error || 'invalid');
+    try { localStorage.setItem('ds-name', name); localStorage.setItem('ds-board-' + S.daily, name); } catch (e) { /* zablokowany storage */ }
+    Sound.good();
+    renderBoard(t.boardSaved(body.rank, body.total));
+  } catch (e) {
+    note.textContent = t.boardErr[e.message] || t.boardError;
+    btn.disabled = false; btn.textContent = t.boardSubmit;
+  }
 }
 
 // Profil: w jakich rodzajach zgłoszeń gracz dał się nabrać. Liczą się tylko pomyłki ze skutkami

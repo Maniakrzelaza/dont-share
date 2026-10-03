@@ -19,6 +19,7 @@ services:
       - caddy_config:/config
     depends_on:
       - web
+      - api
 
   web:
     image: ${DS_WEB_IMAGE:?DS_WEB_IMAGE is missing - run deploy.sh instead of compose directly}
@@ -27,7 +28,16 @@ services:
     ports:
       - "127.0.0.1:8080:80"
 
+  api:
+    image: ${DS_API_IMAGE:?DS_API_IMAGE is missing - run deploy.sh instead of compose directly}
+    restart: unless-stopped
+    # No published ports: Caddy reaches it over the container network at /api/*.
+    volumes:
+      # Leaderboard entries. Must outlive releases, or every deploy would wipe today's ranking.
+      - ds_data:/data
+
 volumes:
+  ds_data:
   # Certificates must outlive container replacement, otherwise every release would ask the
   # authority for a new one and exhaust the rate limit.
   caddy_data:
