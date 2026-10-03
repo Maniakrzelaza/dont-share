@@ -124,6 +124,7 @@ const UI = {
       satire: { name: 'Satyra wzięta na serio', tip: 'Zanim się oburzysz, sprawdź, czym jest strona źródłowa.' },
       quote: { name: 'Ucięte i zmyślone cytaty', tip: 'Szukaj pełnej wypowiedzi i sprawdź, czy autor cytatu w ogóle istnieje.' },
       stats: { name: 'Przekręcone badania i liczby', tip: 'Pytaj: ile osób, z ilu, kto badał. Procent z małej liczby niewiele znaczy.' },
+      prejudice: { name: 'Fałszywki wymierzone w mniejszości', tip: 'Gdy tekst obwinia całą grupę ludzi, zwolnij. Takie fałszywki grają na uprzedzeniach. Przeczytaj dokument źródłowy.' },
       real: { name: 'Prawdziwe, choć zaskakujące wiadomości', tip: 'Nie każda dobra, nudna czy nietypowa wiadomość jest fałszywa. Weryfikuj, zanim odrzucisz.' }
     },
     photoCredit: 'FOT.:', shares: s => `↻ ${s} udostępnień`, reported: 'Zgłoszono jako podejrzane',
@@ -268,6 +269,7 @@ const UI = {
       satire: { name: 'Satire taken seriously', tip: 'Before you get outraged, check what the source site is.' },
       quote: { name: 'Cut and invented quotes', tip: 'Find the full statement and check that the person quoted actually exists.' },
       stats: { name: 'Twisted studies and numbers', tip: 'Ask: how many people, out of how many, who did the study. A percentage of a small number means little.' },
+      prejudice: { name: 'Fakes aimed at minorities', tip: 'When a story blames a whole group of people, slow down. These fakes play on prejudice. Read the source document.' },
       real: { name: 'True but surprising news', tip: 'Not every good, boring or unusual story is fake. Verify before you dismiss.' }
     },
     photoCredit: 'PHOTO:', shares: s => `↻ ${s} shares`, reported: 'Reported as suspicious',

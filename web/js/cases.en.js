@@ -356,7 +356,18 @@ const POOL_EN = [
           dokument: 'The erratum on the publisher’s website confirms the error and gives the correct date. Schools received the same notice.' },
     lesson: 'A correction is a sign of reliability, not weakness. The source admitted the error and showed how it is fixing it.',
     fallout: { headline: 'Publisher asks why its apology is ‘false’',
-      body: 'We marked a correction as untrue. Teachers never heard about the textbook error.' } }
+      body: 'We marked a correction as untrue. Teachers never heard about the textbook error.' } },
+
+  { reporter: 'A history teacher from Lublin',
+    post: { name: 'Voice of the Nation', time: '2 h',
+      text: 'The US is forcing Poland to pay $300 billion to Jewish organisations! Act 447 has just come into force and the government is silent. Share before they block it!',
+      shares: '58K' },
+    ev: { zrodlo: 'Account created this year; it mostly posts content aimed at minorities. Within an hour, dozens of accounts with similarly built names posted the same text.',
+          data: 'US act no. 447 (the JUST Act) was signed on 9 May 2018. It isn’t new, and nothing “came into force” today.',
+          dokument: 'The act requires the US State Department to report to Congress on how several dozen countries handle property seized during the Holocaust. It places no payment obligation on Poland or any other country and names no amounts.' },
+    lesson: 'A real law, invented consequences. Fakes often target a minority and play on prejudice, because outrage gets the most clicks. When a story blames a whole group of people, read the source document before you believe it.',
+    fallout: { headline: 'Wave of hate in the comments after the ‘Act 447’ post',
+      body: 'Thousands of comments attacking Jews appeared under the shares. The local Jewish community has asked police for protection ahead of Saturday’s service.' } }
 ];
 
 if (typeof module !== 'undefined') module.exports = { POOL_EN };

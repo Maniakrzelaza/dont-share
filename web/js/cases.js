@@ -384,7 +384,18 @@ const POOL = [
           dokument: ['ok', 'Errata na stronie wydawnictwa potwierdza błąd i podaje poprawną datę. Ten sam komunikat dostały szkoły.'] },
     lesson: 'Sprostowanie to znak rzetelności, nie słabości. Źródło przyznało się do błędu i pokazało, jak go poprawia.',
     fallout: { headline: 'Wydawnictwo pyta, czemu jego przeprosiny to „fałsz”',
-      body: 'Oznaczyliśmy sprostowanie jako nieprawdziwe. Nauczyciele nie dowiedzieli się o błędzie w podręczniku.' } }
+      body: 'Oznaczyliśmy sprostowanie jako nieprawdziwe. Nauczyciele nie dowiedzieli się o błędzie w podręczniku.' } },
+
+  { tier: 3, type: 'prejudice', kind: 'post', truth: 'manipulacja', reporter: 'Nauczyciel historii z Lublina',
+    post: { name: 'Prawda Narodu', handle: '@PrawdaNarodu_PL', time: '2 godz.',
+      text: 'USA każą Polsce zapłacić 300 mld dolarów żydowskim organizacjom! Ustawa 447 właśnie weszła w życie, a rząd milczy. Udostępnij, zanim zablokują!',
+      shares: '58 tys.' },
+    ev: { zrodlo: ['red', 'Konto założone w tym roku, publikuje głównie wpisy wymierzone w mniejszości. Ten sam tekst w ciągu godziny opublikowało kilkadziesiąt kont o podobnie zbudowanych nazwach.'],
+          data: ['red', 'Amerykańska ustawa nr 447 (tzw. JUST Act) została podpisana 9 maja 2018 r. Nie jest nowa i dziś nic nie „weszło w życie”.'],
+          dokument: ['red', 'Tekst ustawy zobowiązuje Departament Stanu USA do przygotowania raportu dla Kongresu o tym, jak kilkadziesiąt państw rozwiązuje sprawy mienia zagrabionego w czasie Holokaustu. Nie nakłada na Polskę ani żaden inny kraj obowiązku wypłaty i nie wymienia żadnych kwot.'] },
+    lesson: 'Prawdziwa ustawa, zmyślone skutki. Fałszywki często celują w mniejszość i grają na uprzedzeniach, bo oburzenie najszybciej się klika. Gdy tekst obwinia całą grupę ludzi, przeczytaj dokument źródłowy, zanim uwierzysz.',
+    fallout: { headline: 'Fala nienawiści w komentarzach po wpisie o „ustawie 447”',
+      body: 'Pod udostępnieniami pojawiły się tysiące wpisów atakujących Żydów. Lokalna gmina żydowska prosi policję o ochronę przed sobotnim nabożeństwem.' } }
 ];
 
 const FALLBACK_EVIDENCE = {
