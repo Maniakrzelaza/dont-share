@@ -59,9 +59,15 @@ function langButton() {
   return `<button class="lang" id="lang" aria-label="${T().langSwitchLabel}" lang="${LANG === 'pl' ? 'en' : 'pl'}">${T().langSwitch}</button>`;
 }
 
+function soundButton() {
+  return `<button class="lang" id="sound" aria-label="${T().soundLabel}" aria-pressed="${Sound.enabled}">${Sound.enabled ? T().soundOn : T().soundOff}</button>`;
+}
+
 function bindLang() {
   const b = document.getElementById('lang');
   if (b) b.onclick = () => setLang(LANG === 'pl' ? 'en' : 'pl');
+  const s = document.getElementById('sound');
+  if (s) s.onclick = () => { Sound.toggle(); render(); };
 }
 
 function render() {
@@ -77,7 +83,7 @@ function render() {
   bindLang();
 }
 
-const memo = inner => `<div class="langbar">${langButton()}</div><div class="memo">${inner}</div>`;
+const memo = inner => `<div class="langbar">${soundButton()}${langButton()}</div><div class="memo">${inner}</div>`;
 
 function renderIntro() {
   const t = T();
@@ -94,7 +100,7 @@ function renderIntro() {
       <li>${t.shortcuts(`${keys} <span class="kbd">1</span>–<span class="kbd">4</span>`)}</li>
     </ul>
     <button class="go" id="go">${t.introGo}</button>`);
-  document.getElementById('go').onclick = () => { S.screen = 'dayIntro'; render(); };
+  document.getElementById('go').onclick = () => { S.screen = 'dayIntro'; Sound.paper(); render(); };
 }
 
 // Skutki decyzji z danego dnia: zgłoszenia, które wróciły w prasie (hasFallout).
@@ -133,7 +139,7 @@ function renderDayIntro() {
     <p>${txt.memo}</p>
     ${nt}
     <button class="go" id="go">${t.dayGo}</button>`);
-  document.getElementById('go').onclick = () => { S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.caseStart = 0; S.used = []; S.pin = null; render(); };
+  document.getElementById('go').onclick = () => { Sound.click(); S.screen = 'desk'; S.idx = 0; S.minutes = 0; S.caseStart = 0; S.used = []; S.pin = null; render(); };
 }
 
 function photoHTML(p) {
@@ -193,7 +199,7 @@ function renderDesk() {
     <div class="stat"><span class="lbl">${t.lblQueue}</span><span class="val">${S.idx + 1} / ${dayCases().length}</span></div>
     <div class="stat"><span class="lbl">${t.lblScore}</span><span class="val">${S.score}</span></div>
     <div class="stat"><span class="lbl">${t.lblTrust(S.trust)}</span><div class="meter${S.trust <= 40 ? ' low' : ''}"><i style="width:${S.trust}%"></i></div></div>
-    <div class="bar-actions">${langButton()}<button class="restart" id="restart">${t.restart}</button></div>
+    <div class="bar-actions">${soundButton()}${langButton()}<button class="restart" id="restart">${t.restart}</button></div>
   </header>
   <main class="desk">
     <section>
@@ -242,6 +248,7 @@ function useTool(k) {
   if (S.screen !== 'desk' || S.used.includes(k) || !DAYS[S.day].tools.includes(k)) return;
   S.used.push(k);
   S.minutes += TOOL_COST;
+  Sound.teleprinter();
   if (S.minutes >= DAY_MIN) return endDay();
   render();
 }
@@ -249,6 +256,7 @@ function useTool(k) {
 function pin(k) {
   if (S.screen !== 'desk' || !S.used.includes(k)) return;
   S.pin = S.pin === k ? null : k;
+  Sound.pin();
   render();
 }
 
@@ -265,6 +273,8 @@ function stamp(v) {
   S.last = { verdict: v, correct, pin: S.pin, pinGood, pts, dTrust, reach };
   S.log.push({ day: S.day, id: dayCases()[S.idx], verdict: v, correct, missed: false, pinGood, reach });
   if (coaching()) finishTutorial();
+  Sound.stamp();
+  setTimeout(correct ? Sound.good : Sound.bad, 220);
   S.screen = 'feedback';
   render();
 }
@@ -310,6 +320,7 @@ function next() {
 
 function endDay() {
   const missed = S.screen === 'desk' ? dayCases().slice(S.idx) : [];
+  if (S.screen === 'desk') Sound.bell();
   missed.forEach(id => S.log.push({ day: S.day, id, verdict: null, correct: false, missed: true, pinGood: false, reach: 0 }));
   S.trust = Math.max(0, S.trust - missed.length * 10);
   S.last = null;
@@ -342,7 +353,12 @@ function renderDayEnd() {
     </div>
     <button class="go" id="go">${lastDay ? t.btnFinal : t.btnHome}</button>`);
   document.getElementById('go').onclick = () => {
-    if (lastDay) S.screen = 'end'; else { S.day++; S.screen = 'dayIntro'; }
+    if (lastDay) S.screen = 'end';
+    else {
+      S.day++; S.screen = 'dayIntro';
+      Sound.paper();
+      if (falloutOf(S.day - 1).length >= 3) Sound.phone();
+    }
     render();
   };
 }
@@ -364,6 +380,7 @@ function bindShare(text) {
   $copy.onclick = async () => {
     try {
       await navigator.clipboard.writeText(text);
+      Sound.click();
       $copy.textContent = t.shareCopied;
       setTimeout(() => { $copy.textContent = T().shareCopy; }, 2000);
     } catch (e) {
@@ -415,12 +432,16 @@ function renderEnd() {
 }
 
 // zegar
-let lastTick = performance.now();
+let lastTick = performance.now(), lastSecond = 0;
 setInterval(() => {
   const now = performance.now(), dt = (now - lastTick) / 1000; lastTick = now;
   if (S.screen !== 'desk' || coaching()) return;
   S.minutes += dt * DAYS[S.day].speed;
   if (S.minutes >= DAY_MIN) return endDay();
+  // W ostatniej godzinie zegar tyka co sekundę.
+  const second = Math.floor(now / 1000);
+  if (S.minutes > DAY_MIN - 60 && second !== lastSecond) Sound.tick();
+  lastSecond = second;
   const el = document.getElementById('clock');
   if (el) { el.textContent = clockText(S.minutes); el.classList.toggle('late', S.minutes > DAY_MIN - 60); }
   const $reach = document.getElementById('reach');

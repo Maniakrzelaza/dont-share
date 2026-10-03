@@ -10,6 +10,7 @@ const UI = {
   pl: {
     htmlTitle: 'Don’t Share — gra o fake newsach',
     langSwitch: 'English', langSwitchLabel: 'Switch to English',
+    soundOn: '♪ Dźwięk wł.', soundOff: '♪ Dźwięk wył.', soundLabel: 'Dźwięk',
     tools: {
       zrodlo:   { name: 'Rejestr źródeł',       desc: 'Kto to opublikował i od kiedy działa' },
       data:     { name: 'Archiwum dat',         desc: 'Kiedy treść pojawiła się po raz pierwszy' },
@@ -127,6 +128,7 @@ const UI = {
   en: {
     htmlTitle: 'Don’t Share — a game about fake news',
     langSwitch: 'Polski', langSwitchLabel: 'Przełącz na polski',
+    soundOn: '♪ Sound on', soundOff: '♪ Sound off', soundLabel: 'Sound',
     tools: {
       zrodlo:   { name: 'Source registry',      desc: 'Who published it and how long they have been around' },
       data:     { name: 'Date archive',         desc: 'When the content first appeared' },

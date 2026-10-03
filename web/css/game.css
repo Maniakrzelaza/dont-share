@@ -263,7 +263,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outlin
 }
 
 /* przełącznik języka */
-.langbar { max-width: 680px; margin: 2vh auto -2vh; display: flex; justify-content: flex-end; }
+.langbar { max-width: 680px; margin: 2vh auto -2vh; display: flex; justify-content: flex-end; gap: 8px; }
 .bar-actions { display: flex; gap: 8px; align-self: center; }
 .lang {
   background: transparent; color: var(--desk-fg); border: 1px solid var(--desk-muted); border-radius: 4px;
