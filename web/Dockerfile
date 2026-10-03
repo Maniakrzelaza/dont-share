@@ -2,7 +2,7 @@
 FROM caddy:2-alpine
 
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY index.html dontshare.png /srv/
+COPY index.html dontshare.png dontshare-en.png /srv/
 COPY css /srv/css
 COPY js /srv/js
 
