@@ -1,0 +1,17 @@
+# Serwer plików wewnątrz kontenera web. Certyfikaty i nagłówki bezpieczeństwa są na brzegu
+# (deploy/Caddyfile) — tutaj tylko HTTP w sieci kontenerów.
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# index.html zmienia się z każdym wydaniem, więc przeglądarka ma go sprawdzać za każdym razem.
+	@html path / /index.html
+	header @html Cache-Control "no-cache"
+
+	file_server
+}

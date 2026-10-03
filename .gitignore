@@ -1,0 +1,18 @@
+# --- Sekrety: nigdy w repozytorium ---
+.env
+.env.*
+*.pem
+*.key
+
+# --- Claude Code: ustawienia osobiste ---
+.claude/settings.local.json
+
+# --- Narzędzia i IDE ---
+.idea/
+.vscode/
+*.swp
+
+# --- System ---
+Thumbs.db
+desktop.ini
+.DS_Store

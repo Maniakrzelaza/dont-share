@@ -1,0 +1,93 @@
+# Don't Share pipeline: check, build, deploy.
+#
+# Every push to main that touches deployable code builds one image tagged with the commit SHA,
+# pushes it to GitHub Container Registry and deploys it. Nothing here knows the server's address —
+# that lives in the "production" environment, and provisioning a replacement host is
+# deploy/bootstrap.sh.
+#
+# Required in Settings -> Environments -> production (see deploy/README.md):
+#   secrets: DS_SSH_KEY, DS_SSH_KNOWN_HOSTS
+#   variables: DS_DEPLOY_HOST, DS_DEPLOY_USER, DS_DOMAIN
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths: [web/**, deploy/**, .github/workflows/deploy.yml]
+  pull_request:
+    paths: [web/**]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The whole game is one inline script; a syntax error there is a blank desk for every player.
+      - name: Syntax-check the game script
+        run: |
+          sed -n '/^<script>$/,/^<\/script>$/p' web/index.html | sed '1d;$d' > /tmp/game.js
+          test -s /tmp/game.js
+          node --check /tmp/game.js
+
+  image:
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      ref: ${{ steps.ref.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: ref
+        # GHCR requires lowercase names; the owner here has capitals.
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}/web:${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - run: docker build --build-arg DS_BUILD_SHA="${GITHUB_SHA::8}" -t "${{ steps.ref.outputs.ref }}" web
+      - run: docker push "${{ steps.ref.outputs.ref }}"
+
+  production:
+    needs: image
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ vars.DS_DOMAIN }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare SSH
+        env:
+          DS_SSH_KEY: ${{ secrets.DS_SSH_KEY }}
+          DS_SSH_KNOWN_HOSTS: ${{ secrets.DS_SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          # Normalize instead of trusting how the value survived a browser text area: Windows line
+          # endings and a missing final newline both make OpenSSH fail with "error in libcrypto".
+          printf '%s\n' "$DS_SSH_KEY" | sed -e 's/\r$//' > ~/.ssh/deploy_key
+          printf '%s\n' "$DS_SSH_KNOWN_HOSTS" | sed -e 's/\r$//' > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "DS_SSH_KEY is not a usable private key. Expected the first line to be" >&2
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----. Re-paste the contents of ~/.ssh/ds_deploy." >&2
+            exit 1
+          fi
+      - name: Ship configuration and deploy
+        env:
+          HOST: ${{ vars.DS_DEPLOY_HOST }}
+          USER_: ${{ vars.DS_DEPLOY_USER }}
+          DOMAIN: ${{ vars.DS_DOMAIN }}
+          IMAGE: ${{ needs.image.outputs.ref }}
+          REG_USER: ${{ github.actor }}
+          REG_PASS: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RSH="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes"
+          # The server keeps no repository: the configuration it runs is shipped fresh every release.
+          rsync -az --delete -e "$RSH" deploy/ "$USER_@$HOST:/opt/dontshare/"
+          # The job token can pull for the duration of this job, which is all the server needs —
+          # containers restart from the local image copy afterwards.
+          $RSH "$USER_@$HOST" "DS_REGISTRY_HOST=ghcr.io DS_REGISTRY_USER=$REG_USER DS_REGISTRY_PASSWORD=$REG_PASS DS_DOMAIN=$DOMAIN /opt/dontshare/deploy.sh $IMAGE"

@@ -1,0 +1,4 @@
+# Skrypty uruchamiane na serwerze muszą mieć końce linii LF, inaczej bash wywróci się na \r.
+*.sh text eol=lf
+Caddyfile text eol=lf
+*.yml text eol=lf

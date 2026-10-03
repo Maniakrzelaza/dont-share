@@ -1,0 +1,17 @@
+# Edge for Don't Share: one domain, certificate issued automatically.
+#
+# The domain comes from the DS_DOMAIN environment variable (GitHub -> deploy.sh -> .env -> compose),
+# so moving the game to another address needs no change here.
+
+{$DS_DOMAIN}, www.{$DS_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy web:80
+}

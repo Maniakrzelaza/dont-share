@@ -1,0 +1,34 @@
+# Don't Share service composition. Shipped to the server on every release, so the server never
+# keeps its own drifting copy of the configuration.
+#
+# The image tag and the domain come from the .env file that deploy.sh writes — neither is committed
+# here, otherwise every release or a change of domain would require a change in the repository.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DS_DOMAIN: ${DS_DOMAIN:?DS_DOMAIN is missing - run deploy.sh instead of compose directly}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+  web:
+    image: ${DS_WEB_IMAGE:?DS_WEB_IMAGE is missing - run deploy.sh instead of compose directly}
+    restart: unless-stopped
+    # Loopback only: the deploy script needs it for the health check, the internet does not.
+    ports:
+      - "127.0.0.1:8080:80"
+
+volumes:
+  # Certificates must outlive container replacement, otherwise every release would ask the
+  # authority for a new one and exhaust the rate limit.
+  caddy_data:
+  caddy_config:
